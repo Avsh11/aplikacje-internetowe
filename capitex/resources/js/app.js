@@ -1,7 +1,12 @@
 
 
-import Alpine from 'alpinejs';
+// import Alpine from 'alpinejs';
 
-window.Alpine = Alpine;
+// window.Alpine = Alpine;
 
-Alpine.start();
+// Alpine.start();
+
+// Zamienilem AlpineJS oraz Tailwind na zwyklego Bootstrapa, Breeze i Blade domyslnie uzywaja Tailwind
+
+import './bootstrap'; 
+import 'bootstrap';
