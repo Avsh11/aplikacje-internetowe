@@ -33,16 +33,22 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+            // Walidacja waluty
+            'currency' => ['required', 'string', 'in:PLN,USD,EUR'],  
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            // Wymuszamy role usera dla bezpieczenstwa
+            'role_id' => 2,  
+             // Zapis waluty
+            'currency' => $request->currency, 
         ]);
 
-        event(new Registered($user));
+        event(new \Illuminate\Auth\Events\Registered($user));
 
         Auth::login($user);
 
