@@ -1,4 +1,30 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
+
+/* Wywalic tez wszystko zwiazane z tailwindem bo laravel bedzie szukac
+
+  ➜  APP_URL: http://localhost
+[vite:css][postcss] @import must precede all other statements (besides @charset or empty @layer)
+2  |  @tailwind components;
+3  |  @tailwind utilities;
+4  |  @import 'bootstrap/dist/css/bootstrap.min.css';
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5  | */
+
 @import 'bootstrap/dist/css/bootstrap.min.css';
+
+
+/* Wymuszenie jasnego koloru dla tekstów w formularzach Bootstrapa */
+.form-label, .text-muted {
+    color: #adb5bd !important; /* Jasnoszary */
+}
+label {
+    color: #f8f9fa !important; /* Prawie biały */
+}
+/* Poprawa tła dla selecta, zeby byl czytelny */
+.form-select {
+    background-color: #212529 !important;
+    color: #ffffff !important;
+    border-color: #495057 !important;
+}

@@ -11,16 +11,31 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        // Schema dla rol uzytkownikow
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();  // admin lub user
+            $table->timestamps();
+        });
+
+        // Schema dla uzytkownikow (tabela users po prostu)
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('role_id')->default(2)->constrained('roles');  // relacja do roli gdzie dwojka to zwykly uzytokwnik
             $table->string('name');
             $table->string('email')->unique();
+
+            $table->string('currency', 3)->default('PLN');  // domyslna waluta do wyswietlania czegos tam
+
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
         });
 
+        // Laravel default schemas
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
@@ -42,8 +57,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
+
+        // zeby nie rozpierdalac kluczy obcych usuwamy w odwrotnej kolejnosci !!!
+
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('roles');
     }
 };
