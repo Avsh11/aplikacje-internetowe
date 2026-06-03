@@ -1,30 +1,59 @@
-/* @tailwind base;
-@tailwind components;
-@tailwind utilities; */
-
-/* Wywalic tez wszystko zwiazane z tailwindem bo laravel bedzie szukac
-
-  ➜  APP_URL: http://localhost
-[vite:css][postcss] @import must precede all other statements (besides @charset or empty @layer)
-2  |  @tailwind components;
-3  |  @tailwind utilities;
-4  |  @import 'bootstrap/dist/css/bootstrap.min.css';
-   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-5  | */
-
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
+/* Capitex – ciemny panel (Bootstrap domyslnie ma jasne kolory naglowkow kart) */
 
-/* Wymuszenie jasnego koloru dla tekstów w formularzach Bootstrapa */
-.form-label, .text-muted {
-    color: #adb5bd !important; /* Jasnoszary */
+body.bg-dark {
+    color: #f1f3f5;
 }
-label {
-    color: #f8f9fa !important; /* Prawie biały */
+
+/* Naglowki kart, modali – bez tego tekst jest prawie czarny na ciemnym tle */
+body.bg-dark .card-header,
+body.bg-dark .modal-header,
+body.bg-dark .modal-title {
+    color: #f8f9fa !important;
+    background-color: rgba(255, 255, 255, 0.04);
 }
-/* Poprawa tła dla selecta, zeby byl czytelny */
-.form-select {
+
+body.bg-dark .card {
+    color: #f1f3f5;
+}
+
+body.bg-dark .card .fw-bold,
+body.bg-dark .card-header .fw-bold {
+    color: #f8f9fa;
+}
+
+/* Etykiety formularzy – czytelny szary */
+body.bg-dark .form-label,
+body.bg-dark .text-muted {
+    color: #adb5bd !important;
+}
+
+body.bg-dark label {
+    color: #dee2e6 !important;
+}
+
+body.bg-dark .form-control,
+body.bg-dark .form-select {
     background-color: #212529 !important;
     color: #ffffff !important;
     border-color: #495057 !important;
+}
+
+body.bg-dark .form-control:focus,
+body.bg-dark .form-select:focus {
+    background-color: #212529 !important;
+    color: #ffffff !important;
+    border-color: #6c757d !important;
+}
+
+/* Naglowki sekcji menu (MENU) */
+body.bg-dark .nav-section {
+    color: #868e96 !important;
+}
+
+/* Statystyki w kartach – etykieta vs wartosc */
+body.bg-dark .card .fs-4,
+body.bg-dark .card .fs-5 {
+    color: #f8f9fa;
 }

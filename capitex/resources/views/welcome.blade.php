@@ -32,7 +32,7 @@
                 <!-- display-4 robi bardzo duzy, wyrazny tekst tytulowy -->
                 <h1 class="display-4 fw-bold lh-1 mb-4 text-white">Monitoruj swoje inwestycje w prosty sposob.</h1>
                 <!-- leading-relaxed dodaje przestrzeni miedzy liniami tekstu, zeby lepiej sie czytalo -->
-                <p class="fs-5 text-muted mb-5">Capitex to minimalistyczne narzedzie do agregacji Twoich akcji, kryptowalut i walut. Wszystko w jednym przejrzystym dashboardzie.</p>
+                <p class="fs-5 text-muted mb-5">Twoje inwestycje w jednym miejscu.</p>
                 
                 <div class="d-flex gap-3 justify-content-center">
                     <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-4 fw-bold">Zaloz darmowe konto</a>
@@ -45,7 +45,7 @@
     <!-- Stopka -->
     <footer class="footer mt-auto py-3 bg-dark border-top border-secondary text-center text-muted">
         <div class="container">
-            <span class="small">Capitex &copy; {{ date('Y') }} - Projekt zaliczeniowy</span>
+            <span class="small">Capitex &copy; {{ date('Y') }}</span>
         </div>
     </footer>
 
