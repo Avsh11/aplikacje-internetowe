@@ -36,6 +36,9 @@
         <div class="container-fluid px-4">
             <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">📈 Capitex</a>
             <div class="d-flex align-items-center gap-4">
+                @if (Auth::user()->avatarUrl())
+                    <img src="{{ Auth::user()->avatarUrl() }}" alt="Avatar" class="rounded-circle" width="32" height="32" style="object-fit: cover;">
+                @endif
                 <span class="text-muted small">
                     Zalogowany: <strong class="text-light">{{ Auth::user()->name }}</strong>
                     (Waluta: {{ Auth::user()->currency }})
@@ -71,6 +74,11 @@
                     <a href="{{ route('settings.index') }}" class="list-group-item list-group-item-action bg-transparent text-light border-secondary">
                         ⚙️ Ustawienia
                     </a>
+                    @if (!empty($isAdmin))
+                        <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action bg-transparent text-danger border-secondary">
+                            🛡️ Panel admina
+                        </a>
+                    @endif
                 </div>
 
                 <div class="card bg-secondary bg-opacity-10 border-secondary mb-3">
@@ -185,7 +193,7 @@
                                 </thead>
                                 <tbody>
                                     @forelse($holdings as $h)
-                                        <tr>
+                                        <tr class="cursor-pointer" onclick="window.location='{{ route('transactions.index', ['ticker' => $h['asset']->ticker]) }}'">
                                             <td class="border-secondary px-3">
                                                 <strong>{{ $h['asset']->name }}</strong>
                                                 <div class="small text-muted">{{ $h['asset']->ticker }}</div>

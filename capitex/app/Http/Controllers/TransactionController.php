@@ -27,13 +27,15 @@ class TransactionController extends Controller
     // GET /transactions (name: transactions.index)
     // Osobna strona z tabela wszystkich transakcji usera
 
-    public function index()
+    public function index(Request $request)
     {
-        // whereHas portfolio.user_id = Auth::id() w serwisie - nie widzimy cudzych transakcji
-        $transactions = $this->transactionService->getUserTransactions();
+        $filters = $request->only(['name', 'ticker', 'portfolio', 'sort']);
+        $transactions = $this->transactionService->getUserTransactions($filters);
 
-        // compact('transactions') = ['transactions' => $transactions] do blade
-        return view('user.transactions', compact('transactions'));
+        return view('user.transactions', [
+            'transactions' => $transactions,
+            'filters' => $filters,
+        ]);
     }
 
     // POST /transactions (name: transactions.store)

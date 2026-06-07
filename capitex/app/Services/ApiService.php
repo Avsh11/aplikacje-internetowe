@@ -1,18 +1,17 @@
 <?php
 
 namespace App\Services;
-
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
-// Integracja z API zewnetrznymi: Binance (krypto), Yahoo (akcje/ETF), NBP (kursy)
+// Integracja z API: binance (krypto) yahoo finance (akcje/ETF), NBP (kursy)
 // Wywolywany z PortfolioController (/api/search, /api/price) i PortfolioService (wycena portfela)
 // Przy bledzie zwraca null lub [] – aplikacja nie pada, jest fallback (reczna cena / srednia zakupu)
 // Http::withoutVerifying() – dev lokalny; crypto vs stock wybiera PortfolioController po type/source
 
 class ApiService
 {
-    // Cena krypto z Binance (BTC -> BTCUSDT). Dzisiaj: ticker/price, historia: klines [4] = close
+    // Cena krypto z Binance (BTC ==> BTCUSDT) dzisiaj: ticker/price i historia: klines [4] = close
 
     public function getCryptoPrice(string $ticker, $date = null)
     {
@@ -41,7 +40,7 @@ class ApiService
         return null;
     }
 
-    // Cena akcji/ETF z Yahoo. Dzisiaj: regularMarketPrice, historia: ostatni close z tablicy
+    // Cena akcji/ETF z yahoo dzisiaj: regularMarketPrice i historia: ostatni close z tablicy
     // end() a nie reset() – reset bral stara pierwsza wartosc i psul ceny (np. XTB.WA)
 
     public function getStockPrice(string $ticker, $date = null)

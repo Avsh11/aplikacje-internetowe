@@ -33,24 +33,39 @@ class AdminController extends Controller
     // GET /admin/dashboard
     // w widoku sa  statystyki + tabela wszystkich kont jakie sa w apce
 
-    public function index()
+    public function index(Request $request)
     {
         $this->ensureAdmin();
 
-        // przekazujemy dane do blade admin/dashboard.blade.php jako zmienne $usersCount, $users itd.
+        $query = User::with('role');
+
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
+
+        if ($request->filled('email')) {
+            $query->where('email', 'like', '%' . $request->input('email') . '%');
+        }
+
+        if ($request->filled('role_id') && in_array((int) $request->input('role_id'), [1, 2], true)) {
+            $query->where('role_id', (int) $request->input('role_id'));
+        }
+
+        $sort = $request->input('sort', 'role');
+        if ($sort === 'name') {
+            $query->orderBy('name');
+        } elseif ($sort === 'email') {
+            $query->orderBy('email');
+        } else {
+            $query->orderBy('role_id')->orderBy('name');
+        }
+
         return view('admin.dashboard', [
-            // Liczymy tylko konta z rola usera czyli role 2
             'usersCount' => User::where('role_id', 2)->count(),
-
-            // Portfolio::count() wszystkie portfele w aplikacji 
             'portfoliosCount' => Portfolio::count(),
-
-            // Wszystkie transakcje buy w bazie lacznie wszystkich userow jakie sa 
             'transactionsCount' => Transaction::count(),
-
-            // Lista userow
-            // orderByDesc('id') czyli najnowsze konta leca kurwqana gorze tabeli.
-            'users' => User::with('role')->orderByDesc('id')->get(),
+            'users' => $query->get(),
+            'filters' => $request->only(['name', 'email', 'role_id', 'sort']),
         ]);
     }
 

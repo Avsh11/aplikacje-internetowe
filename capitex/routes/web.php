@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\WelcomeController;
 
 // Plik tras aplikacji Capitex (warstwa web, nie API REST)
 // Kazda Route::... laczy URL -> kontroler@metoda
@@ -14,10 +15,8 @@ use App\Http\Controllers\TransactionController;
 // name('...') = nazwa trasy do route('dashboard') w blade i redirectach
 // Na koncie pliku dolaczamy auth.php (login, register, logout)
 
-// Strona startowa (landing) - bez logowania
-Route::get('/', function () {
-    return view('welcome');
-});
+// Strona startowa (landing) - bez logowania, statystyki z bazy
+Route::get('/', [WelcomeController::class, 'index']);
 
 // Stary szablon Breeze - nieuzywany, dashboard jest w DashboardController
 // Route::get('/dashboard', function () {
@@ -26,7 +25,7 @@ Route::get('/', function () {
 
 // --- DASHBOARD (user + przekierowanie admina) ---
 
-// GET /dashboard -> po logowaniu domyslne wejscie (user: panel, admin: redirect do /admin)
+// GET /dashboard -> po logowaniu panel portfela (user i admin)
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Portfolio;
 use App\Models\Asset;
 use App\Services\PortfolioService;
@@ -63,6 +64,7 @@ class PortfolioController extends Controller
             'holdings'     => $data['assets'],
             'totalValue'   => $data['total_value'],
             'chartHistory' => $data['chart_history'],
+            'isAdmin'      => (int) Auth::user()->role_id === 1,
         ]);
     }
 

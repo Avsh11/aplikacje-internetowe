@@ -40,16 +40,52 @@ class TransactionService
 
     // GET /transactions - historia dla zalogowanego usera
 
-    public function getUserTransactions()
+    public function getUserTransactions(array $filters = [])
     {
-        // with() laduje asset i portfolio w jednym zapytaniu (unikamy N+1 w blade)
-        return Transaction::with(['asset', 'portfolio'])
+        $query = Transaction::with(['asset', 'portfolio'])
             ->whereHas('portfolio', function ($query) {
-                // tylko transakcje z portfeli nalezacych do Auth::id()
                 $query->where('user_id', Auth::id());
-            })
-            ->orderBy('transaction_date', 'desc')
-            ->get();
+            });
+
+        if (! empty($filters['ticker'])) {
+            $query->whereHas('asset', function ($query) use ($filters) {
+                $query->where('ticker', 'like', '%' . $filters['ticker'] . '%');
+            });
+        }
+
+        if (! empty($filters['name'])) {
+            $query->whereHas('asset', function ($query) use ($filters) {
+                $query->where('name', 'like', '%' . $filters['name'] . '%');
+            });
+        }
+
+        if (! empty($filters['portfolio'])) {
+            $query->whereHas('portfolio', function ($query) use ($filters) {
+                $query->where('name', 'like', '%' . $filters['portfolio'] . '%');
+            });
+        }
+
+        $sort = $filters['sort'] ?? 'date_desc';
+
+        if ($sort === 'ticker') {
+            $query->join('assets as sort_assets', 'transactions.asset_id', '=', 'sort_assets.id')
+                ->orderBy('sort_assets.ticker')
+                ->select('transactions.*');
+        } elseif ($sort === 'asset_name') {
+            $query->join('assets as sort_assets', 'transactions.asset_id', '=', 'sort_assets.id')
+                ->orderBy('sort_assets.name')
+                ->select('transactions.*');
+        } elseif ($sort === 'portfolio_name') {
+            $query->join('portfolios as sort_portfolios', 'transactions.portfolio_id', '=', 'sort_portfolios.id')
+                ->orderBy('sort_portfolios.name')
+                ->select('transactions.*');
+        } elseif ($sort === 'date_asc') {
+            $query->orderBy('transaction_date', 'asc');
+        } else {
+            $query->orderBy('transaction_date', 'desc');
+        }
+
+        return $query->get();
     }
 
     // DELETE /transactions/{transaction}

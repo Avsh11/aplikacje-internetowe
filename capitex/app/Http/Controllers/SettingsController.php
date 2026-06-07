@@ -42,7 +42,13 @@ class SettingsController extends Controller
     public function update(SettingsUpdateRequest $request): RedirectResponse
     {
         // validated() = tylko pola ktore przeszly reguly z SettingsUpdateRequest
-        $this->settingsService->updateUserSettings($request->user(), $request->validated());
+        $this->settingsService->updateUserSettings(
+            $request->user(),
+            $request->validated(),
+            $request->file('avatar')
+        );
+
+        $request->user()->refresh();
 
         // status settings-updated - w blade @if (session('status') === 'settings-updated')
         return back()->with('status', 'settings-updated');

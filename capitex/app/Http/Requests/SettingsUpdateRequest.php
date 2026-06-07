@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\File;
 
 // Form Request = osobna klasa tylko pod walidacje (Laravel Breeze tez tak robi dla profilu)
 // Po co: zamiast duzego $request->validate([...]) w SettingsController trzymamy reguly tutaj
@@ -33,6 +34,8 @@ class SettingsUpdateRequest extends FormRequest
 
             // waluta wyswietlania na dashboardzie (PLN/USD/EUR)
             'currency' => ['required', 'string', Rule::in(['PLN', 'USD', 'EUR'])],
+
+            'avatar' => ['nullable', File::types(['jpg', 'jpeg', 'png', 'webp'])->max(2048)],
         ];
     }
 }
