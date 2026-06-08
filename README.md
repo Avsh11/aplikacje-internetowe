@@ -317,9 +317,100 @@ W razie gdy zapomnimy hasła możemy kliknąć w przycisk **Zapomniałeś hasła
 
 ![image](/assets/admin/forgot_password.png)
 
-###
+Możemy potem powrócić do logowania klikając w przycisk poniżej formularza.
 
-###
+### Panel rejestracji
+
+Użytkownik może zarejestrować się do systemu tym samym stając się użytkownikiem zamiast użytkownikiem niezalogowanym, który dostęp ma tylko do strony tytułowej i podstawowych statystyk.
+
+Zarejestrować się możemy poprzez podanie w formularzu następujących danych:
+- Imię
+- Adres e-mail
+- Domyślna waluta z pola rozwijanego: **USD** / **PLN** / **EUR** w której będziemy wyświetlać aktywa
+- Podanie hasła i jego powtórzenie
+
+![image](/assets/user/rejestracja.png)
+
+Po kliknięciu przycisku **Utwórz konto** użytkownik zostanie przeniesiony na swój dashboard. Ma on też dostęp do przycisku **Zaloguj się**, uprzednio mając napis zachęcający "Masz już konto?".
+
+### Panel administratora
+
+W aplikacji dostępne jest po uprzedniej konfiguracji konto administratora:
+- email(login): admin@capitex.pl
+- hasło: admin
+
+Gdy zalogujemy się w panelu logowania za pomocą tego adresu oraz hasła zostaniemy przekierowani na pierwszy panel dla roli użytkownika administrator.
+
+#### Dashboard administratora
+
+Po zalogowaniu się, aplikacja przenosi nas poprzez system ról (role_id 0/1) do dashboardu administratora. Administrator podobnie jak użytkownik może posiadać swoje własne portfele i transakcje. Obsługa tej funkcjonalności jest taka sama jak po stronie użytkownika i w jego sekcji będzie odpowiednio wytłumaczona. 
+
+![image](/assets/admin/admin-dashboard.png)
+
+#### Admin panel
+
+Po kliknięciu przycisku **Panel admina** umiejsciowionego w menu po lewej stronie, dodatkowo wyróżnionego kolorem czerwonym przeniesiemy się na panel admina.
+
+![image](/assets/admin/admin-users-dashboard.png)
+
+Po wejściu w panel, możemy zauważyć navbar na którym po prawej stronie mamy przyciski wylogowania się oraz powrotu do panelu dashboard z portfelami. Poniżej mamy trzy kafelki pokazujące następujące informacje:
+- liczba użytkowników
+- liczba portfeli
+- liczba transakcji
+
+Poniżej mamy listę użytkowników oraz formularz filtrujący.
+
+#### Filtrowanie po nazwie
+
+Jednym z filtrów jest filtr **Nazwa** w którym możemy wyszukiwać użytkowników po ich nazwie
+
+![image](/assets/admin/admin-users-dashboard-filter-name.png)
+
+#### Filtrowanie po adresie e-mail
+
+Kolejnym filtrem jest filtr **Email** w którym możemy wyszukiwać użytkowników po ich adresie e-mail
+
+![image](/assets/admin/admin-filter-email.png)
+
+#### Filtrowanie po roli
+
+Kolejnym filtrem jest filtr **Rola** w którym możemy sortować użytkowników po ich roli user/admin
+
+![image](/assets/admin/admin-filter-by-roles.png)
+
+#### Filtrowanie - sortowanie
+
+Kolejnym filtrem jest pole rozwijane **Sortowanie** w którym możemy:
+- filtrować użytkowników zaczynając od administratorów na samej górze
+- filtrować użytkowników od A-Z po nazwie
+- fitrować użytkowników od A-Z po adresie e-mail
+
+![image](/assets/admin/admin-on-top.png)
+
+![image](/assets/admin/name-az.png)
+
+![image](/assets/admin/email-az.png)
+
+#### Edycja użytkowników
+
+Po kliknięciu przycisku po prawej stronie z ikonką ołówka, zostaniemy przeniesieni do panelu edycji danego użytkownika:
+
+![image](/assets/admin/admin-user-dashboard-change-settings.png)
+
+#### Usuwanie użytkowników
+
+Po kliknęciu przycisku po prawej stronie w panelu admina oznaczonego ikonką kosza i czerwonego koloru możemy usunąć danego użytkownika wraz z jego portfelami i transakcjami:
+
+![image](/assets/admin/admin-remove-user.png)
+
+#### Podsumowanie - funkcjonalności administratora
+Administrator w swojej części aplikacji może:
+-
+-
+-
+-
+-
+### Panel użytkownika
 
 ## Plany rozbudowy
 
