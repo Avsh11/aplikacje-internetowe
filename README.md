@@ -304,9 +304,18 @@ Użytkownik niezalogowany jako pierwszą rzecz widzi stronę tytułową. Strona 
 
 ### Logowanie do systemu
 
-Cechą wspólną zarówno konta użytkownika standardowego jak i administratora jest panel logowania który dla obu jest taki sam. 
+Cechą wspólną zarówno konta użytkownika standardowego jak i administratora jest panel logowania który dla obu jest taki sam. Na stronie tytułowej możemy przejść do tego panelu poprzez kliknięcie w przycisk umieszczony w prawym górnym rogu jak i po środku podpisany odpowiednio **Zaloguj się**.
 
 Formularz logowania umożliwia uwierzytelnienie użytkownika przy użyciu adresu email oraz hasła.
+
+![image](/assets/login.png)
+
+Możemy zalogować się za pomocą:
+- Adresu email
+- Hasła
+W razie gdy zapomnimy hasła możemy kliknąć w przycisk **Zapomniałeś hasła?** umieszczony jako niebieski tekst na dole. Ten przycisk przekieruje nas do panelu w którym podając swój adres email możemy poprosić o reset hasła - **funkcja jeszcze niedostępna**
+
+![image](/assets/admin/forgot_password.png)
 
 ###
 
