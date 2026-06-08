@@ -490,3 +490,17 @@ body.capitex-app .modal-body {
     color: var(--cx-accent);
     margin-bottom: 0.25rem;
 }
+
+/* Info box w modalu (np. aktywa alternatywne) */
+.capitex-info-box {
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(59, 130, 246, 0.45);
+    background: rgba(59, 130, 246, 0.12);
+    color: #e2e8f0;
+    line-height: 1.45;
+}
+
+.capitex-info-box .bi {
+    color: #60a5fa;
+}

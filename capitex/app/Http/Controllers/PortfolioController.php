@@ -91,6 +91,11 @@ class PortfolioController extends Controller
         // ApiService tu tworzymy recznie (prosto dla 2 endpointow API, bez DI w konstruktorze)
         $api = new \App\Services\ApiService();
 
+        // Portfele alternatywne – reczny opis zamiast wyszukiwarki API
+        if ($category === 'alternative') {
+            return response()->json([]);
+        }
+
         // exchange = krypto (Binance), reszta = akcje/ETF (Yahoo)
         return response()->json(
             ($category === 'exchange') ? $api->searchCrypto($query) : $api->searchStocks($query)

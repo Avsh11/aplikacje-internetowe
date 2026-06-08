@@ -104,6 +104,7 @@ class PortfolioService
         $rateUser = $rates[$user->currency] ?? 1.0;
 
         $totalPortfolioValue = 0;
+        $marketPortfolioValue = 0;
 
         foreach ($holdings as &$h) {
             $asset = $h['asset'];
@@ -115,17 +116,24 @@ class PortfolioService
             }
             $rateAsset = $rates[$assetCurrency] ?? 1.0;
 
-            // Cena z API w walucie notowania aktywa
-            $currentPrice = ($asset->type === 'crypto')
-                ? $this->apiService->getCryptoPrice($asset->ticker)
-                : $this->apiService->getStockPrice($asset->ticker);
+            // Aktywa alternatywne (gotowka, metale itd.) – brak API, wartosc = koszt zakupu
+            if ($asset->type === 'alternative' || $asset->price_source === 'manual') {
+                $finalPrice = $h['quantity'] > 0 && $rateAsset > 0
+                    ? ($h['total_cost_pln'] / $h['quantity']) / $rateAsset
+                    : 0;
+            } else {
+                // Cena z API w walucie notowania aktywa
+                $currentPrice = ($asset->type === 'crypto')
+                    ? $this->apiService->getCryptoPrice($asset->ticker)
+                    : $this->apiService->getStockPrice($asset->ticker);
 
-            // Jak API padnie - srednia cena zakupu z total_cost_pln
-            $fallbackPrice = $h['quantity'] > 0 && $rateAsset > 0
-                ? ($h['total_cost_pln'] / $h['quantity']) / $rateAsset
-                : 0;
+                // Jak API padnie - srednia cena zakupu z total_cost_pln
+                $fallbackPrice = $h['quantity'] > 0 && $rateAsset > 0
+                    ? ($h['total_cost_pln'] / $h['quantity']) / $rateAsset
+                    : 0;
 
-            $finalPrice = $currentPrice ?? $fallbackPrice;
+                $finalPrice = $currentPrice ?? $fallbackPrice;
+            }
 
             // Wartosc pozycji w PLN: ilosc * cena * kurs waluty aktywa do PLN
             $currentValuePln = $h['quantity'] * $finalPrice * $rateAsset;
@@ -146,11 +154,21 @@ class PortfolioService
                 ? ($h['profit_loss'] / $h['total_cost_converted']) * 100
                 : 0;
 
+            $avgPriceNative = $h['quantity'] > 0 && $rateAsset > 0
+                ? ($h['total_cost_pln'] / $h['quantity']) / $rateAsset
+                : 0;
+            $h['alternative_cash_style'] = ($asset->type === 'alternative' || $asset->price_source === 'manual')
+                && abs($avgPriceNative - 1.0) < 0.0001;
+
             $totalPortfolioValue += $h['current_value_converted'];
+
+            if ($this->isMarketAsset($asset)) {
+                $marketPortfolioValue += $h['current_value_converted'];
+            }
         }
 
-        // Krok 3: prosta historia pod wykres (nie pelny mark-to-market kazdego dnia)
-        $chartHistory = $this->buildPortfolioHistory($transactions, $totalPortfolioValue, $rateUser);
+        // Krok 3: historia wykresu liniowego – tylko aktywa rynkowe (akcje, ETF, krypto)
+        $chartHistory = $this->buildPortfolioHistory($transactions, $marketPortfolioValue, $rateUser);
 
         return [
             'assets'        => $holdings,
@@ -159,10 +177,10 @@ class PortfolioService
         ];
     }
 
-    // Prywatna metoda - sklada labels[] i values[] dla Chart.js na dashboardzie
-    // Logika: skumulowane koszty buy po dniach + ostatni punkt = biezaca wartosc portfela
+    // Prywatna metoda - sklada labels[] i values[] dla wykresu liniowego (Chart.js)
+    // Tylko aktywa z API (akcje, krypto) – alternatywne (gotowka itd.) pomijamy
 
-    private function buildPortfolioHistory($transactions, float $currentPortfolioValue, float $rateUser): array
+    private function buildPortfolioHistory($transactions, float $currentMarketValue, float $rateUser): array
     {
         if ($rateUser <= 0) {
             $rateUser = 1.0;
@@ -172,9 +190,12 @@ class PortfolioService
         $dailyFlowPln = [];
 
         foreach ($sortedTransactions as $transaction) {
+            if (! $transaction->asset || ! $this->isMarketAsset($transaction->asset)) {
+                continue;
+            }
+
             $dateKey = $transaction->transaction_date->format('Y-m-d');
             $amountPln = (float) $transaction->total_cost_pln;
-            // DEMO v1: tylko kupna; sell: -$amountPln wylaczone
             $dailyFlowPln[$dateKey] = ($dailyFlowPln[$dateKey] ?? 0)
                 + ($transaction->type === 'buy' ? $amountPln : 0);
         }
@@ -190,7 +211,7 @@ class PortfolioService
         }
 
         $todayLabel = now()->format('Y-m-d');
-        $currentValueRounded = round($currentPortfolioValue, 2);
+        $currentValueRounded = round($currentMarketValue, 2);
 
         if (empty($labels)) {
             $labels[] = $todayLabel;
@@ -213,5 +234,10 @@ class PortfolioService
             'labels' => $labels,
             'values' => $values,
         ];
+    }
+
+    private function isMarketAsset($asset): bool
+    {
+        return $asset->type !== 'alternative' && $asset->price_source !== 'manual';
     }
 }

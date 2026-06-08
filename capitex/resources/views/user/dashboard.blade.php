@@ -19,7 +19,9 @@
             $totalProfit    += $h['profit_loss'];
             $totalCostBasis += $h['total_cost_converted'];
             if ($h['quantity'] > 0) {
-                $chartLabels[] = $h['asset']->ticker;
+                $chartLabels[] = $h['asset']->type === 'alternative'
+                    ? $h['asset']->name
+                    : $h['asset']->ticker;
                 $chartValues[] = round($h['current_value_converted'], 2);
             }
         }
@@ -113,6 +115,7 @@
                         <div class="card border-secondary h-100">
                             <div class="card-header border-secondary d-flex justify-content-between align-items-center">
                                 <span class="fw-bold"><i class="bi bi-graph-up-arrow me-1"></i>Rozwój portfela</span>
+                                <span class="small text-muted ms-2 d-none d-md-inline">tylko akcje / krypto</span>
                                 <div class="btn-group shadow-sm" id="chartTimeFilters">
                                     <button type="button" class="btn btn-sm btn-outline-primary {{ Auth::user()->default_chart_range === '1D' ? 'active' : '' }}" data-time="1D">1D</button>
                                     <button type="button" class="btn btn-sm btn-outline-primary {{ Auth::user()->default_chart_range === '7D' ? 'active' : '' }}" data-time="7D">7D</button>
@@ -166,23 +169,45 @@
                                         <tr class="cursor-pointer" onclick="window.location='{{ route('transactions.index', ['ticker' => $h['asset']->ticker]) }}'">
                                             <td class="px-3">
                                                 <strong>{{ $h['asset']->name }}</strong>
-                                                <div class="small text-muted">{{ $h['asset']->ticker }}</div>
+                                                <div class="small text-muted">
+                                                    @if($h['asset']->type === 'alternative')
+                                                        <span class="badge badge-cx-alternative" style="font-size: 0.65rem;">Ręczne</span>
+                                                    @else
+                                                        {{ $h['asset']->ticker }}
+                                                    @endif
+                                                </div>
                                             </td>
                                             <td class="text-end align-middle small">
-                                                {{ number_format($h['quantity'], 4) }}
+                                                @if(!empty($h['alternative_cash_style']))
+                                                    <span class="text-muted">—</span>
+                                                @else
+                                                    {{ number_format($h['quantity'], 4) }}
+                                                @endif
                                             </td>
                                             <td class="text-end align-middle small text-muted">
-                                                {{ $h['quantity'] > 0 ? number_format($h['total_cost_converted'] / $h['quantity'], 2) : '0.00' }} {{ Auth::user()->currency }}
+                                                @if($h['asset']->type === 'alternative')
+                                                    <span class="text-muted">—</span>
+                                                @else
+                                                    {{ $h['quantity'] > 0 ? number_format($h['total_cost_converted'] / $h['quantity'], 2) : '0.00' }} {{ Auth::user()->currency }}
+                                                @endif
                                             </td>
                                             <td class="text-end align-middle text-info fw-semibold">
-                                                {{ number_format($h['current_price_converted'], 2) }} {{ Auth::user()->currency }}
+                                                @if($h['asset']->type === 'alternative')
+                                                    <span class="text-muted small">Ręczna</span>
+                                                @else
+                                                    {{ number_format($h['current_price_converted'], 2) }} {{ Auth::user()->currency }}
+                                                @endif
                                             </td>
                                             <td class="text-end align-middle fw-semibold">
                                                 {{ number_format($h['current_value_converted'], 2) }} {{ Auth::user()->currency }}
                                             </td>
-                                            <td class="text-end align-middle px-3 {{ $h['profit_loss'] >= 0 ? 'text-success' : 'text-danger' }}">
-                                                {{ $h['profit_loss'] >= 0 ? '+' : '' }}{{ number_format($h['profit_loss'], 2) }} {{ Auth::user()->currency }}
-                                                <div class="small fw-normal">({{ number_format($h['profit_loss_pct'], 2) }}%)</div>
+                                            <td class="text-end align-middle px-3 {{ $h['asset']->type === 'alternative' ? 'text-muted' : ($h['profit_loss'] >= 0 ? 'text-success' : 'text-danger') }}">
+                                                @if($h['asset']->type === 'alternative')
+                                                    <span class="text-muted">—</span>
+                                                @else
+                                                    {{ $h['profit_loss'] >= 0 ? '+' : '' }}{{ number_format($h['profit_loss'], 2) }} {{ Auth::user()->currency }}
+                                                    <div class="small fw-normal">({{ number_format($h['profit_loss_pct'], 2) }}%)</div>
+                                                @endif
                                             </td>
                                         </tr>
                                     @empty
@@ -253,44 +278,67 @@
                             </select>
                         </div>
 
-                        <div class="mb-3 position-relative">
-                            <label class="form-label text-muted small">Wyszukaj aktywo (min. 2 znaki)</label>
-                            <input type="text" id="asset_search" class="form-control bg-dark text-light border-secondary" placeholder="np. AAPL, Tesla, BTC" autocomplete="off" required>
-                            <ul id="search_results" class="list-group asset-search-results position-absolute w-100 mt-1" style="display:none;"></ul>
-
-                            <input type="hidden" name="asset_ticker"       id="hidden_asset_ticker">
-                            <input type="hidden" name="asset_name"         id="hidden_asset_name">
-                            <input type="hidden" name="asset_type"         id="hidden_asset_type">
-                            <input type="hidden" name="asset_currency"     id="hidden_asset_currency" value="USD">
-                            <input type="hidden" name="asset_price_source" id="hidden_asset_price_source">
-                            {{-- KLUCZOWE: kurs waluty do PLN w momencie transakcji --}}
-                            <input type="hidden" name="exchange_rate_pln"  id="hidden_exchange_rate" value="1.0">
-                        </div>
-
-                        {{-- DEMO v1: tylko kupno – sprzedaż wyłączona w UI (kod sell zachowany poniżej) --}}
+                        <input type="hidden" name="exchange_rate_pln" id="hidden_exchange_rate" value="1.0">
                         <input type="hidden" name="type" value="buy">
-                        {{--
-                        <div class="mb-3">
-                            <label class="form-label text-muted small">Rodzaj transakcji</label>
-                            <select name="type" class="form-select bg-dark text-light border-secondary" required>
-                                <option value="buy">Kupno</option>
-                                <option value="sell">Sprzedaż</option>
-                            </select>
-                        </div>
-                        --}}
 
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label text-muted small">Ilość</label>
-                                <input type="number" id="quantity_input" step="0.00000001" min="0.00000001" name="quantity" class="form-control bg-dark text-light border-secondary" placeholder="0.00" required>
+                        {{-- Panel: akcje / krypto (API) --}}
+                        <div id="market_asset_panel">
+                            <div class="mb-3 position-relative">
+                                <label class="form-label text-muted small">Wyszukaj aktywo (min. 2 znaki)</label>
+                                <input type="text" id="asset_search" class="form-control bg-dark text-light border-secondary" placeholder="np. AAPL, Tesla, BTC" autocomplete="off" required>
+                                <ul id="search_results" class="list-group asset-search-results position-absolute w-100 mt-1" style="display:none;"></ul>
+
+                                <input type="hidden" name="asset_ticker"       id="hidden_asset_ticker">
+                                <input type="hidden" name="asset_name"         id="hidden_asset_name">
+                                <input type="hidden" name="asset_type"         id="hidden_asset_type">
+                                <input type="hidden" name="asset_currency"     id="hidden_asset_currency" value="USD">
+                                <input type="hidden" name="asset_price_source" id="hidden_asset_price_source">
                             </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label text-muted small">Cena za jedn. (<span id="currency_indicator" class="text-white fw-bold">USD</span>)</label>
-                                <input type="number" id="price_input" step="0.0001" min="0.0001" name="price_per_unit" class="form-control bg-dark text-light border-secondary" placeholder="0.00" required>
+
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="form-label text-muted small">Ilość</label>
+                                    <input type="number" id="quantity_input" step="0.00000001" min="0.00000001" name="quantity" class="form-control bg-dark text-light border-secondary" placeholder="0.00" required>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="form-label text-muted small">Cena za jedn. (<span id="currency_indicator" class="text-white fw-bold">USD</span>)</label>
+                                    <input type="number" id="price_input" step="0.0001" min="0.0001" name="price_per_unit" class="form-control bg-dark text-light border-secondary" placeholder="0.00" required>
+                                </div>
+                            </div>
+
+                            <div class="small text-warning mb-3" id="api_error" style="display:none;"></div>
+                        </div>
+
+                        {{-- Panel: portfele alternatywne (reczny opis + kwota) --}}
+                        <div id="alternative_asset_panel" style="display:none;">
+                            <div class="capitex-info-box small mb-3">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Aktywa alternatywne nie są pobierane z giełdy. Wpisujesz opis i kwotę ręcznie — kwota trafia do sumy portfela i wykresu kołowego (alokacja), ale nie do wykresu liniowego.
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Opis aktywa</label>
+                                <input type="text" id="alternative_description" name="description" class="form-control bg-dark text-light border-secondary" placeholder="np. gotówka na koncie, złoto, Porsche 911" maxlength="255">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Kwota (wartość całkowita)</label>
+                                <div class="input-group">
+                                    <input type="number" id="alternative_amount" name="amount" step="0.01" min="0.01" class="form-control bg-dark text-light border-secondary" placeholder="0.00">
+                                    <select id="alternative_currency" name="asset_currency" class="form-select bg-dark text-light border-secondary" style="max-width: 110px;">
+                                        <option value="PLN">PLN</option>
+                                        <option value="USD">USD</option>
+                                        <option value="EUR">EUR</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Ilość <span class="text-muted">(opcjonalnie)</span></label>
+                                <input type="number" id="alternative_quantity" name="alternative_quantity" step="0.0001" min="0.0001" class="form-control bg-dark text-light border-secondary" placeholder="np. 1 — zostaw puste dla gotówki">
                             </div>
                         </div>
 
-                        <div class="small text-warning mb-3" id="api_error" style="display:none;"></div>
                         <div class="small text-danger mb-3" id="form_error" style="display:none;"></div>
 
                         <div class="mb-3">
@@ -427,23 +475,33 @@
         }
 
         // ========== MODAL DODAWANIA TRANSAKCJI ==========
-        // Referencje do pol formularza – latwiej niz document.getElementById w kazdej funkcji
-        const portfolioSelect  = document.getElementById('portfolio_select');
-        const searchInput      = document.getElementById('asset_search');
-        const searchResults    = document.getElementById('search_results');
-        const dateInput        = document.getElementById('date_input');
-        const priceInput       = document.getElementById('price_input');
-        const quantityInput    = document.getElementById('quantity_input');
-        const totalDisplay     = document.getElementById('total_amount_display');
-        const currencyIndicator = document.getElementById('currency_indicator');
-        const transactionForm  = document.getElementById('addTransactionForm');
-        const saveBtn          = document.getElementById('save_transaction_btn');
-        const apiError         = document.getElementById('api_error');
-        const formError        = document.getElementById('form_error');
-        const hiddenRate       = document.getElementById('hidden_exchange_rate');
-        const rateInfo         = document.getElementById('rate_info');
-        const rateCurrency     = document.getElementById('rate_currency');
-        const rateValue        = document.getElementById('rate_value');
+        const portfolioSelect       = document.getElementById('portfolio_select');
+        const marketPanel           = document.getElementById('market_asset_panel');
+        const alternativePanel      = document.getElementById('alternative_asset_panel');
+        const searchInput           = document.getElementById('asset_search');
+        const searchResults         = document.getElementById('search_results');
+        const dateInput             = document.getElementById('date_input');
+        const priceInput            = document.getElementById('price_input');
+        const quantityInput         = document.getElementById('quantity_input');
+        const alternativeDescription = document.getElementById('alternative_description');
+        const alternativeAmount     = document.getElementById('alternative_amount');
+        const alternativeQuantity   = document.getElementById('alternative_quantity');
+        const alternativeCurrency   = document.getElementById('alternative_currency');
+        const totalDisplay          = document.getElementById('total_amount_display');
+        const currencyIndicator     = document.getElementById('currency_indicator');
+        const transactionForm       = document.getElementById('addTransactionForm');
+        const saveBtn               = document.getElementById('save_transaction_btn');
+        const apiError              = document.getElementById('api_error');
+        const formError             = document.getElementById('form_error');
+        const hiddenRate            = document.getElementById('hidden_exchange_rate');
+        const rateInfo              = document.getElementById('rate_info');
+        const rateCurrency          = document.getElementById('rate_currency');
+        const rateValue             = document.getElementById('rate_value');
+
+        function isAlternativeMode() {
+            const category = portfolioSelect.options[portfolioSelect.selectedIndex]?.getAttribute('data-category');
+            return category === 'alternative';
+        }
 
         let timeoutId;       // debounce autocomplete (500 ms)
         let nbpRates = {};   // cache kursow – uzupelniane przy starcie strony
@@ -475,14 +533,52 @@
             dateInput.value = (new Date(now - offset)).toISOString().slice(0, 16);
         }
 
+        function toggleTransactionMode() {
+            const alt = isAlternativeMode();
+
+            marketPanel.style.display = alt ? 'none' : 'block';
+            alternativePanel.style.display = alt ? 'block' : 'none';
+
+            searchInput.required = !alt;
+            quantityInput.required = !alt;
+            priceInput.required = !alt;
+            alternativeDescription.required = alt;
+            alternativeAmount.required = alt;
+
+            // Pola nieaktywnego panelu wylaczone – nie trafiaja do POST (unikamy duplikatu asset_currency)
+            searchInput.disabled = alt;
+            quantityInput.disabled = alt;
+            priceInput.disabled = alt;
+            document.getElementById('hidden_asset_ticker').disabled = alt;
+            document.getElementById('hidden_asset_name').disabled = alt;
+            document.getElementById('hidden_asset_type').disabled = alt;
+            document.getElementById('hidden_asset_currency').disabled = alt;
+            document.getElementById('hidden_asset_price_source').disabled = alt;
+            alternativeDescription.disabled = !alt;
+            alternativeAmount.disabled = !alt;
+            alternativeQuantity.disabled = !alt;
+            alternativeCurrency.disabled = !alt;
+
+            searchResults.style.display = 'none';
+            apiError.style.display = 'none';
+            apiError.innerText = '';
+
+            if (alt) {
+                validateAlternativeForm();
+            } else {
+                validateForm();
+            }
+        }
+
         // Reset modala po zamknieciu / ponownym otwarciu – zeby nie zostaly stare dane
         function clearModal() {
             transactionForm.reset();
             document.getElementById('hidden_asset_ticker').value    = '';
             document.getElementById('hidden_asset_currency').value  = 'USD';
+            alternativeCurrency.value = 'PLN';
             hiddenRate.value = '1.0';
             currencyIndicator.innerText = 'USD';
-            totalDisplay.innerText = '0.00 USD';
+            totalDisplay.innerText = '0.00 PLN';
             searchResults.style.display = 'none';
             rateInfo.style.display = 'none';
             apiError.style.display = 'none';
@@ -491,10 +587,12 @@
             formError.innerText = '';
             saveBtn.disabled = true;
             setCurrentDate();
+            toggleTransactionMode();
         }
 
         document.getElementById('addTransactionModal').addEventListener('hidden.bs.modal', clearModal);
         document.querySelector('[data-bs-target="#addTransactionModal"]').addEventListener('click', clearModal);
+        portfolioSelect.addEventListener('change', toggleTransactionMode);
 
         // Pokazuje kurs waluty aktywa -> PLN i zapisuje go w ukrytym polu formularza
         function updateRateDisplay(currency) {
@@ -521,7 +619,6 @@
             currencyIndicator.innerText = currency;
         }
 
-        // Przycisk Zapisz wylaczony dopoki qty i cena > 0 (dubluje walidacje gt:0 w TransactionController)
         function validateForm() {
             const qty = parseFloat(quantityInput.value);
             const price = parseFloat(priceInput.value);
@@ -529,7 +626,41 @@
             const hasPrice = Number.isFinite(price) && price > 0;
 
             if (!hasQty || !hasPrice) {
-                formError.innerText = 'Ilosc i cena musza byc wieksze od zera.';
+                formError.innerText = 'Ilość i cena muszą być większe od zera.';
+                formError.style.display = 'block';
+                saveBtn.disabled = true;
+                return;
+            }
+
+            formError.style.display = 'none';
+            saveBtn.disabled = false;
+        }
+
+        function validateAlternativeForm() {
+            const desc = alternativeDescription.value.trim();
+            const amount = parseFloat(alternativeAmount.value);
+            const qtyRaw = alternativeQuantity.value.trim();
+            const qty = qtyRaw === '' ? null : parseFloat(qtyRaw);
+            const currency = alternativeCurrency.value || 'PLN';
+            const hasDesc = desc.length > 0;
+            const hasAmount = Number.isFinite(amount) && amount > 0;
+            const hasValidQty = qty === null || (Number.isFinite(qty) && qty > 0);
+
+            updateRateDisplay(currency);
+
+            totalDisplay.innerText = (hasAmount ? amount : 0).toLocaleString(undefined, {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            }) + ' ' + currency;
+
+            if (!hasDesc || !hasAmount) {
+                formError.innerText = 'Opis i kwota muszą być wypełnione.';
+                formError.style.display = 'block';
+                saveBtn.disabled = true;
+                return;
+            }
+
+            if (!hasValidQty) {
+                formError.innerText = 'Ilość musi być większa od zera (lub zostaw puste dla gotówki).';
                 formError.style.display = 'block';
                 saveBtn.disabled = true;
                 return;
@@ -571,8 +702,9 @@
         }
 
         // AUTocomplete aktyw – GET /api/search?q=...&category=broker|exchange
-        // category z data-category opcji portfela (akcje vs krypto)
         searchInput.addEventListener('input', function(e) {
+            if (isAlternativeMode()) return;
+
             clearTimeout(timeoutId);
             const query    = e.target.value;
             const category = portfolioSelect.options[portfolioSelect.selectedIndex].getAttribute('data-category');
@@ -632,7 +764,12 @@
 
         quantityInput.addEventListener('input', () => { calculateTotal(); validateForm(); });
         priceInput.addEventListener('input', () => { calculateTotal(); validateForm(); });
+        alternativeDescription.addEventListener('input', validateAlternativeForm);
+        alternativeAmount.addEventListener('input', validateAlternativeForm);
+        alternativeQuantity.addEventListener('input', validateAlternativeForm);
+        alternativeCurrency.addEventListener('change', validateAlternativeForm);
         setCurrentDate();
+        toggleTransactionMode();
     });
     </script>
 </body>

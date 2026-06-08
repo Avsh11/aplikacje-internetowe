@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Services\TransactionService;
 use App\Models\Asset;
+use App\Models\Portfolio;
 use App\Models\Transaction;
 
 // Kontroler transakcji buy (historia + dodawanie + usuwanie)
@@ -43,6 +46,19 @@ class TransactionController extends Controller
 
     public function store(Request $request)
     {
+        $portfolio = Portfolio::where('id', $request->input('portfolio_id'))
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        if ($portfolio->category === 'alternative') {
+            return $this->storeAlternativeTransaction($request);
+        }
+
+        return $this->storeMarketTransaction($request);
+    }
+
+    private function storeMarketTransaction(Request $request)
+    {
         $validated = $request->validate([
             'portfolio_id'       => 'required|exists:portfolios,id',
             'asset_ticker'       => 'required|string',
@@ -50,19 +66,57 @@ class TransactionController extends Controller
             'asset_type'         => 'required|string',
             'asset_currency'     => 'required|string',
             'asset_price_source' => 'required|string',
-            // DEMO v1: tylko buy - przy sell odkomentowac druga linie i logike w PortfolioService
             'type'               => 'required|in:buy',
-            // 'type'            => 'required|in:buy,sell',
-            // gt:0 = ilosc i cena musza byc wieksze od zera (ochrona przed smieciowymi danymi)
             'quantity'           => 'required|numeric|gt:0',
             'price_per_unit'     => 'required|numeric|gt:0',
             'transaction_date'   => 'required|date',
-            // kurs aktywa -> PLN z frontu (NBP / recznie) - potrzebny do total_cost_pln
             'exchange_rate_pln'  => 'required|numeric|min:0.0001',
         ]);
 
-        // Slownik aktywow: jeden ticker = jeden wiersz w tabeli assets
-        // firstOrNew: jesli ticker istnieje - aktualizujemy metadane (np. currency po poprawce API)
+        $this->persistTransaction($validated);
+
+        return back()->with('status', 'Transakcja zapisana pomyślnie!');
+    }
+
+    private function storeAlternativeTransaction(Request $request)
+    {
+        $validated = $request->validate([
+            'portfolio_id'           => 'required|exists:portfolios,id',
+            'description'            => 'required|string|max:255',
+            'amount'                 => 'required|numeric|gt:0',
+            'alternative_quantity'   => 'nullable|numeric|gt:0',
+            'asset_currency'         => 'required|string|in:PLN,USD,EUR',
+            'transaction_date'       => 'required|date',
+            'exchange_rate_pln'      => 'required|numeric|min:0.0001',
+            'type'                   => 'required|in:buy',
+        ]);
+
+        $description = trim($validated['description']);
+        $amount = (float) $validated['amount'];
+
+        $validated['asset_ticker'] = $this->generateAlternativeTicker($description);
+        $validated['asset_name'] = $description;
+        $validated['asset_type'] = 'alternative';
+        $validated['asset_price_source'] = 'manual';
+
+        if (! empty($validated['alternative_quantity'])) {
+            // np. samochod: ilosc 1, cena = kwota / ilosc
+            $qty = (float) $validated['alternative_quantity'];
+            $validated['quantity'] = $qty;
+            $validated['price_per_unit'] = $amount / $qty;
+        } else {
+            // gotowka: brak ilosci – sumowanie kolejnych wplat tego samego opisu
+            $validated['quantity'] = $amount;
+            $validated['price_per_unit'] = 1;
+        }
+
+        $this->persistTransaction($validated);
+
+        return back()->with('status', 'Transakcja alternatywna zapisana pomyślnie!');
+    }
+
+    private function persistTransaction(array $validated): void
+    {
         $asset = Asset::firstOrNew(['ticker' => $validated['asset_ticker']]);
         $asset->name = $validated['asset_name'];
         $asset->type = $validated['asset_type'];
@@ -70,13 +124,27 @@ class TransactionController extends Controller
         $asset->price_source = $validated['asset_price_source'];
         $asset->save();
 
-        // asset_id wymagany w Transaction::create w serwisie
         $validated['asset_id'] = $asset->id;
 
-        // serwis liczy total_cost_pln = quantity * price_per_unit * exchange_rate_pln
         $this->transactionService->createTransaction($validated);
+    }
 
-        return back()->with('status', 'Transakcja zapisana pomyślnie!');
+    private function generateAlternativeTicker(string $description): string
+    {
+        $slug = strtoupper(Str::slug($description, ''));
+        $slug = preg_replace('/[^A-Z0-9]/', '', $slug) ?? '';
+
+        if ($slug === '') {
+            $slug = 'ASSET' . substr(md5($description), 0, 6);
+        }
+
+        $ticker = 'ALT-' . substr($slug, 0, 24);
+
+        if (Asset::where('ticker', $ticker)->exists()) {
+            return $ticker . '-' . substr(md5($description), 0, 4);
+        }
+
+        return $ticker;
     }
 
     // DELETE /transactions/{transaction} (name: transactions.destroy)
@@ -84,7 +152,6 @@ class TransactionController extends Controller
 
     public function destroy(Transaction $transaction)
     {
-        // sprawdzenie czy transakcja nalezy do portfela zalogowanego usera - w serwisie
         $this->transactionService->deleteTransaction($transaction);
 
         return back()->with('status', 'Transakcja została usunięta!');

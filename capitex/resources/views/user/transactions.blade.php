@@ -83,10 +83,29 @@
                                             </td>
                                             <td class="align-middle fw-semibold">
                                                 {{ $t->asset->name }}
-                                                <div class="small text-muted fw-normal">{{ $t->asset->ticker }}</div>
+                                                <div class="small text-muted fw-normal">
+                                                    @if($t->asset->type === 'alternative')
+                                                        <span class="badge badge-cx-alternative" style="font-size: 0.65rem;">Ręczne</span>
+                                                    @else
+                                                        {{ $t->asset->ticker }}
+                                                    @endif
+                                                </div>
                                             </td>
-                                            <td class="text-end align-middle small">{{ number_format($t->quantity, 4) }}</td>
-                                            <td class="text-end align-middle small">{{ number_format($t->price_per_unit, 2) }}</td>
+                                            @php $altCashStyle = $t->asset->type === 'alternative' && abs((float) $t->price_per_unit - 1.0) < 0.0001; @endphp
+                                            <td class="text-end align-middle small">
+                                                @if($altCashStyle)
+                                                    <span class="text-muted">—</span>
+                                                @else
+                                                    {{ number_format($t->quantity, 4) }}
+                                                @endif
+                                            </td>
+                                            <td class="text-end align-middle small">
+                                                @if($t->asset->type === 'alternative')
+                                                    <span class="text-muted">—</span>
+                                                @else
+                                                    {{ number_format($t->price_per_unit, 2) }}
+                                                @endif
+                                            </td>
                                             <td class="text-end align-middle fw-semibold text-info">
                                                 {{ number_format($t->quantity * $t->price_per_unit, 2) }} {{ strtoupper($t->currency ?? $t->asset->currency) }}
                                             </td>

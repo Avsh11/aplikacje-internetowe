@@ -24,8 +24,9 @@ class DatabaseSeeder extends Seeder
             'currency' => 'PLN',
         ]);
 
-        $this->call ([
-            AssetSeeder::class, 
+        $this->call([
+            UserSeeder::class,
+            AssetSeeder::class,
         ]);
     }
 }

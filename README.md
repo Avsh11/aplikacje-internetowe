@@ -157,10 +157,33 @@ php artisan migrate
 
 #### 4. Dane początkowe (seed)
 
-Seeder wypełnia bazę danymi startowymi (role, konto administratora):
+Główny seeder (`DatabaseSeeder`) wypełnia bazę danymi startowymi:
+
+| Co tworzy | Plik | Opis |
+|-----------|------|------|
+| Role `admin` / `user` | `DatabaseSeeder` | Słownik ról w systemie |
+| Konto administratora | `DatabaseSeeder` | Jedno konto z pełnymi uprawnieniami |
+| **100 kont testowych** | `UserSeeder` | Losowe polskie imiona i unikalne maile (Faker `pl_PL`), **bez portfeli i transakcji** |
+| Słownik aktywów | `AssetSeeder` | Globalne tickery (BTC, AAPL, CDR) – nie przypisane do użytkowników |
+
+**Pełny reset bazy + seed** (zalecane przy pierwszym uruchomieniu i przed zdjęciami do dokumentacji):
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+Tylko seed na istniejącej strukturze tabel (bez kasowania danych):
 
 ```bash
 php artisan db:seed
+```
+
+> **Uwaga:** `UserSeeder` generuje **nowe** maile przy każdym uruchomieniu. Ponowne `db:seed` bez `migrate:fresh` może skończyć się błędem duplikatów – wtedy użyj `migrate:fresh --seed` albo uruchom tylko brakujące seedery na czystej bazie.
+
+Tylko 100 użytkowników testowych (gdy role i admin już istnieją w bazie):
+
+```bash
+php artisan db:seed --class=UserSeeder
 ```
 
 Dodatkowo utwórz symlink do folderu z plikami publicznymi (wymagany do **avatarów** użytkowników):
@@ -169,14 +192,23 @@ Dodatkowo utwórz symlink do folderu z plikami publicznymi (wymagany do **avatar
 php artisan storage:link
 ```
 
-**Domyślne konto administratora po seedzie:**
+**Konto administratora po seedzie:**
 
 | Pole | Wartość |
 |------|---------|
 | Email | `admin@capitex.pl` |
 | Hasło | `admin` |
 
-Zwykły użytkownik zakłada konto samodzielnie przez stronę rejestracji (`/register`) – otrzymuje rolę `user`.
+**Konta testowe z `UserSeeder` (100 szt.):**
+
+| Pole | Wartość |
+|------|---------|
+| Rola | `user` (zwykły użytkownik) |
+| Nazwa / email | Losowe, generowane przez Faker (np. `jan.kowalski@example.com`) |
+| Hasło | `password` (wspólne dla wszystkich kont testowych) |
+| Portfele / transakcje | Brak – puste konta pod listę w panelu admina i statystyki |
+
+Zwykły użytkownik może też założyć konto samodzielnie przez stronę rejestracji (`/register`) – otrzymuje rolę `user`.
 
 #### 5. Build frontendu
 
