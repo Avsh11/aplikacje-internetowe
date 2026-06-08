@@ -6,81 +6,44 @@
     <title>Capitex - Historia Transakcji</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-dark text-light">
+<body class="bg-dark text-light capitex-app">
 
-    <!-- Nawigacja górna -->
-    <nav class="navbar navbar-dark bg-secondary bg-opacity-10 border-bottom border-secondary py-3">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">📈 Capitex</a>
-            <div class="d-flex align-items-center gap-4">
-                @if (Auth::user()->avatarUrl())
-                    <img src="{{ Auth::user()->avatarUrl() }}" alt="Avatar" class="rounded-circle" width="32" height="32" style="object-fit: cover;">
-                @endif
-                <span class="text-muted small">
-                    Zalogowany jako: <strong class="text-light">{{ Auth::user()->name }}</strong> 
-                    (Waluta: {{ Auth::user()->currency }})
-                </span>
-                <form method="POST" action="{{ route('logout') }}" class="m-0">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Wyloguj się</button>
-                </form>
-            </div>
-        </div>
-    </nav>
+    @include('partials.user-navbar')
 
     <div class="container-fluid mt-4 px-4">
         @if (session('status'))
             <div class="alert alert-success bg-transparent border-success text-success p-2 small mb-4">
-                {{ session('status') }}
+                <i class="bi bi-check-circle me-1"></i>{{ session('status') }}
             </div>
         @endif
 
         <div class="row">
-            
-            <!-- PANEL BOCZNY -->
             <div class="col-md-3">
-                <div class="nav-section text-muted small text-uppercase fw-bold mb-2">Menu</div>
-                <div class="list-group mb-4">
-                    <a href="{{ route('dashboard') }}" class="list-group-item list-group-item-action bg-transparent text-light border-secondary">
-                        📊 Dashboard
-                    </a>
-                    <a href="{{ route('transactions.index') }}" class="list-group-item list-group-item-action bg-secondary bg-opacity-25 text-light border-secondary fw-bold">
-                        📋 Transakcje
-                    </a>
-                    <a href="{{ route('settings.index') }}" class="list-group-item list-group-item-action bg-transparent text-light border-secondary">
-                        ⚙️ Ustawienia
-                    </a>
-                    @if ((int) Auth::user()->role_id === 1)
-                        <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action bg-transparent text-danger border-secondary">
-                            🛡️ Panel admina
-                        </a>
-                    @endif
-                </div>
+                @include('partials.user-sidebar-menu')
             </div>
 
-            <!-- GŁÓWNA ZAWARTOŚĆ -->
             <div class="col-md-9">
-                <div class="card bg-secondary bg-opacity-10 border-secondary h-100">
+                <div class="card border-secondary h-100">
                     <div class="card-header border-secondary p-3">
-                        <span class="fw-bold">Historia Transakcji</span>
+                        <span class="fw-bold"><i class="bi bi-clock-history me-1"></i>Historia Transakcji</span>
                     </div>
                     <div class="card-body border-bottom border-secondary p-3">
                         <form method="GET" action="{{ route('transactions.index') }}" class="row g-2 align-items-end">
                             <div class="col-md-3">
-                                <label class="form-label text-muted small mb-1">Nazwa aktywa</label>
-                                <input type="text" name="name" value="{{ $filters['name'] ?? '' }}" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="np. NVIDIA">
+                                <label class="form-label text-muted small mb-1"><i class="bi bi-search me-1"></i>Nazwa aktywa</label>
+                                <input type="text" name="name" value="{{ $filters['name'] ?? '' }}" class="form-control form-control-sm" placeholder="np. NVIDIA">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label text-muted small mb-1">Ticker</label>
-                                <input type="text" name="ticker" value="{{ $filters['ticker'] ?? '' }}" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="np. NVDA">
+                                <input type="text" name="ticker" value="{{ $filters['ticker'] ?? '' }}" class="form-control form-control-sm" placeholder="np. NVDA">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label text-muted small mb-1">Portfel</label>
-                                <input type="text" name="portfolio" value="{{ $filters['portfolio'] ?? '' }}" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="np. XTB">
+                                <input type="text" name="portfolio" value="{{ $filters['portfolio'] ?? '' }}" class="form-control form-control-sm" placeholder="np. XTB">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label text-muted small mb-1">Sortowanie</label>
-                                <select name="sort" class="form-select form-select-sm bg-dark text-light border-secondary">
+                                <select name="sort" class="form-select form-select-sm">
                                     <option value="date_desc" {{ ($filters['sort'] ?? 'date_desc') === 'date_desc' ? 'selected' : '' }}>Data (najnowsze)</option>
                                     <option value="date_asc" {{ ($filters['sort'] ?? '') === 'date_asc' ? 'selected' : '' }}>Data (najstarsze)</option>
                                     <option value="ticker" {{ ($filters['sort'] ?? '') === 'ticker' ? 'selected' : '' }}>Ticker (A-Z)</option>
@@ -89,56 +52,56 @@
                                 </select>
                             </div>
                             <div class="col-md-2 d-flex gap-2">
-                                <button type="submit" class="btn btn-sm btn-primary">Filtruj</button>
+                                <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-funnel me-1"></i>Filtruj</button>
                                 <a href="{{ route('transactions.index') }}" class="btn btn-sm btn-outline-secondary">Wyczyść</a>
                             </div>
                         </form>
                     </div>
-                    
+
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0">
+                            <table class="table table-dark table-hover capitex-table mb-0">
                                 <thead>
                                     <tr>
-                                        <th class="text-muted border-secondary px-3">DATA</th>
-                                        <th class="text-muted border-secondary">PORTFEL</th>
-                                        <th class="text-muted border-secondary">AKTYWO</th>
-                                        <th class="text-muted border-secondary text-end">ILOŚĆ</th>
-                                        <th class="text-muted border-secondary text-end">CENA JEDN.</th>
-                                        <th class="text-muted border-secondary text-end">WARTOŚĆ</th>
-                                        <th class="text-muted border-secondary text-end px-3">AKCJA</th>
+                                        <th class="px-3">Data</th>
+                                        <th>Portfel</th>
+                                        <th>Aktywo</th>
+                                        <th class="text-end">Ilość</th>
+                                        <th class="text-end">Cena jedn.</th>
+                                        <th class="text-end">Wartość</th>
+                                        <th class="text-end px-3">Akcja</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($transactions as $t)
                                         <tr>
-                                            <td class="border-secondary px-3 align-middle text-muted small">
+                                            <td class="px-3 align-middle text-muted small">
                                                 {{ $t->transaction_date->format('Y-m-d H:i') }}
                                             </td>
-                                            <td class="border-secondary align-middle">
-                                                <span class="badge bg-secondary">{{ $t->portfolio->name }}</span>
+                                            <td class="align-middle">
+                                                <span class="badge badge-cx-broker">{{ $t->portfolio->name }}</span>
                                             </td>
-                                            <td class="border-secondary align-middle fw-bold">
+                                            <td class="align-middle fw-semibold">
                                                 {{ $t->asset->name }}
                                                 <div class="small text-muted fw-normal">{{ $t->asset->ticker }}</div>
                                             </td>
-                                            <td class="border-secondary text-end align-middle">{{ number_format($t->quantity, 4) }}</td>
-                                            <td class="border-secondary text-end align-middle">{{ number_format($t->price_per_unit, 2) }}</td>
-                                            <td class="border-secondary text-end align-middle fw-bold text-info">
+                                            <td class="text-end align-middle small">{{ number_format($t->quantity, 4) }}</td>
+                                            <td class="text-end align-middle small">{{ number_format($t->price_per_unit, 2) }}</td>
+                                            <td class="text-end align-middle fw-semibold text-info">
                                                 {{ number_format($t->quantity * $t->price_per_unit, 2) }} {{ strtoupper($t->currency ?? $t->asset->currency) }}
                                             </td>
-                                            <td class="border-secondary text-end align-middle px-3">
-                                                <!-- Formularz do usuwania (Metoda DELETE) -->
+                                            <td class="text-end align-middle px-3">
                                                 <form action="{{ route('transactions.destroy', $t->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Czy na pewno chcesz usunąć tę transakcję?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 11px;">Usuń</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                                                 </form>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="text-center text-muted py-5 border-secondary">
+                                            <td colspan="7" class="text-center text-muted py-5">
+                                                <i class="bi bi-inbox d-block fs-3 mb-2 opacity-50"></i>
                                                 @if (!empty($filters['name']) || !empty($filters['ticker']) || !empty($filters['portfolio']))
                                                     Brak transakcji dla wybranych filtrów.
                                                 @else
@@ -153,7 +116,6 @@
                     </div>
                 </div>
             </div>
-            
         </div>
     </div>
 

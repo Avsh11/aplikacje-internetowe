@@ -6,14 +6,8 @@
     <title>Capitex - Dashboard</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .cursor-pointer { cursor: pointer; }
-        .cursor-pointer:hover { background-color: #343a40 !important; }
-        .delete-btn { opacity: 0.3; transition: 0.2s; }
-        .delete-btn:hover { opacity: 1 !important; }
-    </style>
 </head>
-<body class="bg-dark text-light">
+<body class="bg-dark text-light capitex-app">
 
     @php
         $totalProfit    = 0;
@@ -32,24 +26,7 @@
         $totalProfitPct = $totalCostBasis > 0 ? ($totalProfit / $totalCostBasis) * 100 : 0;
     @endphp
 
-    <nav class="navbar navbar-dark bg-secondary bg-opacity-10 border-bottom border-secondary py-3">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">📈 Capitex</a>
-            <div class="d-flex align-items-center gap-4">
-                @if (Auth::user()->avatarUrl())
-                    <img src="{{ Auth::user()->avatarUrl() }}" alt="Avatar" class="rounded-circle" width="32" height="32" style="object-fit: cover;">
-                @endif
-                <span class="text-muted small">
-                    Zalogowany: <strong class="text-light">{{ Auth::user()->name }}</strong>
-                    (Waluta: {{ Auth::user()->currency }})
-                </span>
-                <form method="POST" action="{{ route('logout') }}" class="m-0">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Wyloguj się</button>
-                </form>
-            </div>
-        </div>
-    </nav>
+    @include('partials.user-navbar')
 
     <div class="container-fluid mt-4 px-4">
 
@@ -63,41 +40,34 @@
 
             <!-- PANEL BOCZNY -->
             <div class="col-md-3">
-                <div class="nav-section text-muted small text-uppercase fw-bold mb-2">Menu</div>
-                <div class="list-group mb-4">
-                    <a href="{{ route('dashboard') }}" class="list-group-item list-group-item-action {{ request()->routeIs('dashboard') ? 'bg-secondary bg-opacity-25 text-light fw-bold' : 'bg-transparent text-light' }} border-secondary">
-                        📊 Dashboard
-                    </a>
-                    <a href="{{ route('transactions.index') }}" class="list-group-item list-group-item-action bg-transparent text-light border-secondary">
-                        📋 Transakcje
-                    </a>
-                    <a href="{{ route('settings.index') }}" class="list-group-item list-group-item-action bg-transparent text-light border-secondary">
-                        ⚙️ Ustawienia
-                    </a>
-                    @if (!empty($isAdmin))
-                        <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action bg-transparent text-danger border-secondary">
-                            🛡️ Panel admina
-                        </a>
-                    @endif
-                </div>
+                @include('partials.user-sidebar-menu')
 
-                <div class="card bg-secondary bg-opacity-10 border-secondary mb-3">
+                <div class="card border-secondary mb-3">
                     <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">Moje Portfele</span>
-                        <button class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addPortfolioModal">+</button>
+                        <span class="fw-bold"><i class="bi bi-briefcase me-1"></i>Moje Portfele</span>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addPortfolioModal" title="Dodaj portfel">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
                     </div>
                     <div class="list-group list-group-flush">
                         @forelse ($portfolios as $portfolio)
                             <div class="list-group-item bg-transparent border-secondary d-flex justify-content-between align-items-center {{ request()->fullUrlIs(route('portfolios.show', $portfolio->id)) ? 'bg-secondary bg-opacity-25' : '' }}">
                                 <a href="{{ route('portfolios.show', $portfolio->id) }}" class="text-decoration-none text-light flex-grow-1">
-                                    <span class="{{ request()->fullUrlIs(route('portfolios.show', $portfolio->id)) ? 'fw-bold' : '' }}">💼 {{ $portfolio->name }}</span>
+                                    <span class="{{ request()->fullUrlIs(route('portfolios.show', $portfolio->id)) ? 'fw-bold' : '' }}"><i class="bi bi-wallet2 me-1 opacity-75"></i>{{ $portfolio->name }}</span>
                                 </a>
                                 <div class="d-flex align-items-center gap-2">
-                                    <span class="badge bg-secondary" style="font-size: 0.7rem;">{{ ucfirst($portfolio->category) }}</span>
+                                    @php
+                                        $catClass = match($portfolio->category) {
+                                            'broker' => 'badge-cx-broker',
+                                            'exchange' => 'badge-cx-exchange',
+                                            default => 'badge-cx-alternative',
+                                        };
+                                    @endphp
+                                    <span class="badge {{ $catClass }}" style="font-size: 0.7rem;">{{ ucfirst($portfolio->category) }}</span>
                                     <form action="{{ route('portfolios.destroy', $portfolio->id) }}" method="POST" class="m-0" onsubmit="return confirm('Czy na pewno chcesz usunąć ten portfel?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none delete-btn">🗑️</button>
+                                        <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none delete-btn" title="Usuń portfel"><i class="bi bi-trash"></i></button>
                                     </form>
                                 </div>
                             </div>
@@ -114,23 +84,23 @@
                 <!-- Statystyki Top -->
                 <div class="row mb-4">
                     <div class="col-md-4">
-                        <div class="card bg-secondary bg-opacity-10 border-secondary p-3 h-100">
-                            <div class="text-muted small mb-1 text-uppercase fw-bold">Wartość całkowita</div>
-                            <div class="fs-4 fw-bold">{{ number_format($totalValue, 2) }} {{ Auth::user()->currency }}</div>
+                        <div class="card border-secondary p-3 h-100 capitex-stat-card">
+                            <div class="stat-label mb-1"><i class="bi bi-piggy-bank me-1"></i>Wartość całkowita</div>
+                            <div class="stat-value">{{ number_format($totalValue, 2) }} {{ Auth::user()->currency }}</div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card bg-secondary bg-opacity-10 border-secondary p-3 h-100">
-                            <div class="text-muted small mb-1 text-uppercase fw-bold">Niezrealizowany zysk</div>
-                            <div class="fs-4 fw-bold {{ $totalProfit >= 0 ? 'text-success' : 'text-danger' }}">
+                        <div class="card border-secondary p-3 h-100 capitex-stat-card">
+                            <div class="stat-label mb-1"><i class="bi bi-graph-up me-1"></i>Niezrealizowany zysk</div>
+                            <div class="stat-value {{ $totalProfit >= 0 ? 'text-success' : 'text-danger' }}">
                                 {{ $totalProfit >= 0 ? '+' : '' }}{{ number_format($totalProfit, 2) }} {{ Auth::user()->currency }}
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card bg-secondary bg-opacity-10 border-secondary p-3 h-100">
-                            <div class="text-muted small mb-1 text-uppercase fw-bold">Zwrot (%)</div>
-                            <div class="fs-4 fw-bold {{ $totalProfit >= 0 ? 'text-success' : 'text-danger' }}">
+                        <div class="card border-secondary p-3 h-100 capitex-stat-card">
+                            <div class="stat-label mb-1"><i class="bi bi-percent me-1"></i>Zwrot (%)</div>
+                            <div class="stat-value {{ $totalProfit >= 0 ? 'text-success' : 'text-danger' }}">
                                 {{ $totalProfit >= 0 ? '▲' : '▼' }} {{ number_format($totalProfitPct, 2) }}%
                             </div>
                         </div>
@@ -140,9 +110,9 @@
                 <!-- WYKRESY -->
                 <div class="row mb-4">
                     <div class="col-md-8">
-                        <div class="card bg-secondary bg-opacity-10 border-secondary h-100">
+                        <div class="card border-secondary h-100">
                             <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-                                <span class="fw-bold">Rozwój portfela</span>
+                                <span class="fw-bold"><i class="bi bi-graph-up-arrow me-1"></i>Rozwój portfela</span>
                                 <div class="btn-group shadow-sm" id="chartTimeFilters">
                                     <button type="button" class="btn btn-sm btn-outline-primary {{ Auth::user()->default_chart_range === '1D' ? 'active' : '' }}" data-time="1D">1D</button>
                                     <button type="button" class="btn btn-sm btn-outline-primary {{ Auth::user()->default_chart_range === '7D' ? 'active' : '' }}" data-time="7D">7D</button>
@@ -157,8 +127,8 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card bg-secondary bg-opacity-10 border-secondary h-100">
-                            <div class="card-header border-secondary"><span class="fw-bold">Alokacja</span></div>
+                        <div class="card border-secondary h-100">
+                            <div class="card-header border-secondary"><span class="fw-bold"><i class="bi bi-pie-chart me-1"></i>Alokacja</span></div>
                             <div class="card-body d-flex justify-content-center align-items-center">
                                 @if(empty($chartValues))
                                     <span class="text-muted small">Brak aktywów</span>
@@ -171,54 +141,53 @@
                 </div>
 
                 <!-- Tabela Aktywów -->
-                <div class="card bg-secondary bg-opacity-10 border-secondary">
+                <div class="card border-secondary">
                     <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">Moje Aktywa</span>
-                        <button class="btn btn-sm btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#addTransactionModal" {{ count($portfolios) == 0 ? 'disabled' : '' }}>
-                            + Dodaj transakcję
+                        <span class="fw-bold"><i class="bi bi-layers me-1"></i>Moje Aktywa</span>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addTransactionModal" {{ count($portfolios) == 0 ? 'disabled' : '' }}>
+                            <i class="bi bi-plus-lg me-1"></i>Dodaj transakcję
                         </button>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0">
+                            <table class="table table-dark table-hover capitex-table mb-0">
                                 <thead>
                                     <tr>
-                                        <th class="text-muted border-secondary px-3">AKTYWO</th>
-                                        <th class="text-muted border-secondary text-end">ILOŚĆ</th>
-                                        <th class="text-muted border-secondary text-end">ŚR. CENA ZAKUPU</th>
-                                        <th class="text-muted border-secondary text-end">AKTUALNA CENA</th>
-                                        <th class="text-muted border-secondary text-end">WARTOŚĆ</th>
-                                        <th class="text-muted border-secondary text-end px-3">ZYSK/STRATA</th>
+                                        <th class="px-3">Aktywo</th>
+                                        <th class="text-end">Ilość</th>
+                                        <th class="text-end">Śr. cena zakupu</th>
+                                        <th class="text-end">Aktualna cena</th>
+                                        <th class="text-end">Wartość</th>
+                                        <th class="text-end px-3">Zysk/strata</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($holdings as $h)
                                         <tr class="cursor-pointer" onclick="window.location='{{ route('transactions.index', ['ticker' => $h['asset']->ticker]) }}'">
-                                            <td class="border-secondary px-3">
+                                            <td class="px-3">
                                                 <strong>{{ $h['asset']->name }}</strong>
                                                 <div class="small text-muted">{{ $h['asset']->ticker }}</div>
                                             </td>
-                                            <td class="border-secondary text-end align-middle">
+                                            <td class="text-end align-middle small">
                                                 {{ number_format($h['quantity'], 4) }}
                                             </td>
-                                            <td class="border-secondary text-end align-middle">
-                                                {{-- Średnia cena zakupu = koszt całkowity / ilość --}}
+                                            <td class="text-end align-middle small text-muted">
                                                 {{ $h['quantity'] > 0 ? number_format($h['total_cost_converted'] / $h['quantity'], 2) : '0.00' }} {{ Auth::user()->currency }}
                                             </td>
-                                            <td class="border-secondary text-end align-middle text-info fw-bold">
+                                            <td class="text-end align-middle text-info fw-semibold">
                                                 {{ number_format($h['current_price_converted'], 2) }} {{ Auth::user()->currency }}
                                             </td>
-                                            <td class="border-secondary text-end align-middle fw-bold">
+                                            <td class="text-end align-middle fw-semibold">
                                                 {{ number_format($h['current_value_converted'], 2) }} {{ Auth::user()->currency }}
                                             </td>
-                                            <td class="border-secondary text-end align-middle px-3 {{ $h['profit_loss'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                            <td class="text-end align-middle px-3 {{ $h['profit_loss'] >= 0 ? 'text-success' : 'text-danger' }}">
                                                 {{ $h['profit_loss'] >= 0 ? '+' : '' }}{{ number_format($h['profit_loss'], 2) }} {{ Auth::user()->currency }}
                                                 <div class="small fw-normal">({{ number_format($h['profit_loss_pct'], 2) }}%)</div>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="text-center text-muted py-5 border-secondary">Brak aktywów w portfelu.</td>
+                                            <td colspan="6" class="text-center text-muted py-5">Brak aktywów w portfelu.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -287,7 +256,7 @@
                         <div class="mb-3 position-relative">
                             <label class="form-label text-muted small">Wyszukaj aktywo (min. 2 znaki)</label>
                             <input type="text" id="asset_search" class="form-control bg-dark text-light border-secondary" placeholder="np. AAPL, Tesla, BTC" autocomplete="off" required>
-                            <ul id="search_results" class="list-group position-absolute w-100 mt-1 shadow-lg" style="display:none; z-index:1000; max-height:200px; overflow-y:auto;"></ul>
+                            <ul id="search_results" class="list-group asset-search-results position-absolute w-100 mt-1" style="display:none;"></ul>
 
                             <input type="hidden" name="asset_ticker"       id="hidden_asset_ticker">
                             <input type="hidden" name="asset_name"         id="hidden_asset_name">
@@ -343,7 +312,7 @@
                     </div>
                     <div class="modal-footer border-secondary">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Anuluj</button>
-                        <button type="submit" class="btn btn-success fw-bold" id="save_transaction_btn">Zapisz transakcję</button>
+                        <button type="submit" class="btn btn-primary" id="save_transaction_btn"><i class="bi bi-check-lg me-1"></i>Zapisz transakcję</button>
                     </div>
                 </form>
             </div>
@@ -617,8 +586,11 @@
                 if (data.length > 0) {
                     data.forEach(item => {
                         const li = document.createElement('li');
-                        li.className = 'list-group-item list-group-item-action bg-dark text-light border-secondary cursor-pointer';
-                        li.innerHTML = `<strong>${item.ticker}</strong> - ${item.name} <span class="badge bg-secondary float-end">${item.currency}</span>`;
+                        li.className = 'list-group-item asset-search-item';
+                        li.innerHTML = `<strong>${item.ticker}</strong> - ${item.name} <span class="badge badge-cx-broker float-end">${item.currency}</span>`;
+                        li.addEventListener('mousedown', function(ev) {
+                            ev.preventDefault();
+                        });
                         li.onclick = function() {
                             const currency = item.currency || 'USD';
 
@@ -644,9 +616,11 @@
             }, 500);
         });
 
-        // Klik poza lista – chowamy wyniki wyszukiwania
+        // Klik poza polem i lista – chowamy wyniki (mousedown na li nie zamyka – preventDefault wyzej)
         document.addEventListener('click', e => {
-            if (e.target !== searchInput) searchResults.style.display = 'none';
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
         });
 
         // Zmiana daty – pobierz cene historyczna jesli aktywo juz wybrane

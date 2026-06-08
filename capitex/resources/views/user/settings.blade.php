@@ -6,26 +6,9 @@
     <title>Capitex - Ustawienia</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-dark text-light">
+<body class="bg-dark text-light capitex-app">
 
-    <nav class="navbar navbar-dark bg-secondary bg-opacity-10 border-bottom border-secondary py-3">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">📈 Capitex</a>
-            <div class="d-flex align-items-center gap-4">
-                @if (Auth::user()->avatarUrl())
-                    <img src="{{ Auth::user()->avatarUrl() }}" alt="Avatar" class="rounded-circle" width="32" height="32" style="object-fit: cover;">
-                @endif
-                <span class="text-muted small">
-                    Zalogowany jako: <strong class="text-light">{{ Auth::user()->name }}</strong>
-                    (Waluta: {{ Auth::user()->currency }})
-                </span>
-                <form method="POST" action="{{ route('logout') }}" class="m-0">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Wyloguj się</button>
-                </form>
-            </div>
-        </div>
-    </nav>
+    @include('partials.user-navbar')
 
     <div class="container-fluid mt-4 px-4">
         @if (session('status') === 'settings-updated')
@@ -42,29 +25,13 @@
 
         <div class="row">
             <div class="col-md-3">
-                <div class="nav-section text-muted small text-uppercase fw-bold mb-2">Menu</div>
-                <div class="list-group mb-4">
-                    <a href="{{ route('dashboard') }}" class="list-group-item list-group-item-action bg-transparent text-light border-secondary">
-                        📊 Dashboard
-                    </a>
-                    <a href="{{ route('transactions.index') }}" class="list-group-item list-group-item-action bg-transparent text-light border-secondary">
-                        📋 Transakcje
-                    </a>
-                    <a href="{{ route('settings.index') }}" class="list-group-item list-group-item-action bg-secondary bg-opacity-25 text-light border-secondary fw-bold">
-                        ⚙️ Ustawienia
-                    </a>
-                    @if ((int) Auth::user()->role_id === 1)
-                        <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action bg-transparent text-danger border-secondary">
-                            🛡️ Panel admina
-                        </a>
-                    @endif
-                </div>
+                @include('partials.user-sidebar-menu')
             </div>
 
             <div class="col-md-9">
-                <div class="card bg-secondary bg-opacity-10 border-secondary mb-4">
+                <div class="card border-secondary mb-4">
                     <div class="card-header border-secondary p-3">
-                        <span class="fw-bold">Profil i preferencje</span>
+                        <span class="fw-bold"><i class="bi bi-person-gear me-1"></i>Profil i preferencje</span>
                     </div>
                     <div class="card-body">
                         <form method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data">
@@ -78,7 +45,7 @@
                                         @if ($user->avatarUrl())
                                             <img src="{{ $user->avatarUrl() }}" alt="Avatar" class="rounded-circle border border-secondary" width="64" height="64" style="object-fit: cover;">
                                         @else
-                                            <div class="rounded-circle border border-secondary d-flex align-items-center justify-content-center bg-dark text-muted" style="width: 64px; height: 64px;">?</div>
+                                            <div class="rounded-circle border border-secondary d-flex align-items-center justify-content-center bg-dark text-muted" style="width: 64px; height: 64px;"><i class="bi bi-person fs-4"></i></div>
                                         @endif
                                         <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" class="form-control bg-dark text-light border-secondary">
                                     </div>
@@ -114,14 +81,14 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary fw-bold">Zapisz ustawienia</button>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Zapisz ustawienia</button>
                         </form>
                     </div>
                 </div>
 
-                <div class="card bg-secondary bg-opacity-10 border-secondary">
+                <div class="card border-secondary">
                     <div class="card-header border-secondary p-3">
-                        <span class="fw-bold">Zmiana hasła</span>
+                        <span class="fw-bold"><i class="bi bi-key me-1"></i>Zmiana hasła</span>
                     </div>
                     <div class="card-body">
                         <form method="POST" action="{{ route('password.update') }}">
@@ -145,7 +112,7 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-warning fw-bold">Zmień hasło</button>
+                            <button type="submit" class="btn btn-outline-light"><i class="bi bi-shield-lock me-1"></i>Zmień hasło</button>
                         </form>
                     </div>
                 </div>

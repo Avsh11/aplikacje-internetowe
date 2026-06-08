@@ -1,59 +1,492 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
-/* Capitex – ciemny panel (Bootstrap domyslnie ma jasne kolory naglowkow kart) */
-
-body.bg-dark {
-    color: #f1f3f5;
+:root {
+    --cx-bg: #0c0c0e;
+    --cx-surface: #131316;
+    --cx-card: #1a1a1f;
+    --cx-border: rgba(255, 255, 255, 0.08);
+    --cx-border-soft: rgba(255, 255, 255, 0.05);
+    --cx-accent: #3b82f6;
+    --cx-accent-hover: #2563eb;
+    --cx-text: #ececef;
+    --cx-muted: #71717a;
+    --cx-subtle: #a1a1aa;
+    --cx-green: #4ade80;
+    --cx-red: #f87171;
+    --cx-info: #7dd3fc;
 }
 
-/* Naglowki kart, modali – bez tego tekst jest prawie czarny na ciemnym tle */
+body.bg-dark,
+body.capitex-app {
+    background-color: var(--cx-bg) !important;
+    color: var(--cx-text);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 15px;
+}
+
+body.capitex-app::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(var(--cx-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--cx-border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.07;
+    pointer-events: none;
+    z-index: 0;
+}
+
+body.capitex-app::after {
+    content: '';
+    position: fixed;
+    width: 700px;
+    height: 700px;
+    left: 50%;
+    top: -120px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+body.capitex-app > nav,
+body.capitex-app > .container-fluid,
+body.capitex-app > .container,
+body.capitex-app > main,
+body.capitex-app > footer {
+    position: relative;
+    z-index: 1;
+}
+
+/* Logo */
+.capitex-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--cx-text) !important;
+}
+
+.capitex-logo-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--cx-accent), #6366f1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.capitex-logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: -0.5px;
+}
+
+.capitex-logo-text.admin {
+    color: #f87171;
+}
+
+/* Nagłówki */
+.capitex-page-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+}
+
+/* Navbar */
+body.bg-dark .navbar,
+body.capitex-app .navbar {
+    background-color: var(--cx-surface) !important;
+    border-color: var(--cx-border) !important;
+}
+
+/* Karty */
+body.bg-dark .card,
+body.capitex-app .card {
+    background-color: var(--cx-card) !important;
+    border-color: var(--cx-border) !important;
+    border-radius: 14px;
+    color: var(--cx-text);
+}
+
 body.bg-dark .card-header,
+body.capitex-app .card-header,
 body.bg-dark .modal-header,
-body.bg-dark .modal-title {
-    color: #f8f9fa !important;
-    background-color: rgba(255, 255, 255, 0.04);
+body.capitex-app .modal-header {
+    color: var(--cx-text) !important;
+    background-color: transparent !important;
+    border-color: var(--cx-border-soft) !important;
+    border-bottom: 1px solid var(--cx-border-soft) !important;
 }
 
-body.bg-dark .card {
-    color: #f1f3f5;
+body.capitex-app .card > .card-body.border-bottom {
+    border-color: var(--cx-border-soft) !important;
+}
+
+body.capitex-app .border-secondary {
+    border-color: var(--cx-border-soft) !important;
+}
+
+/* Karta z tabelą flush – jedna miękka linia zamiast podwójnej kreski */
+body.capitex-app .card:has(.card-body.p-0) > .card-header {
+    border-bottom: none !important;
+    padding-bottom: 0.75rem;
+}
+
+body.capitex-app .list-group-flush .list-group-item {
+    border-color: var(--cx-border-soft) !important;
+}
+
+body.capitex-app .btn-group .btn {
+    border-radius: 6px !important;
+    margin-right: 3px;
 }
 
 body.bg-dark .card .fw-bold,
-body.bg-dark .card-header .fw-bold {
-    color: #f8f9fa;
+body.capitex-app .card .fw-bold,
+body.bg-dark .card-header .fw-bold,
+body.capitex-app .card-header .fw-bold {
+    color: var(--cx-text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
 }
 
-/* Etykiety formularzy – czytelny szary */
+/* Statystyki – czytelne liczby, bez „rozciągniętego” Syne */
+.capitex-stat-card .stat-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cx-muted) !important;
+    font-weight: 500;
+}
+
+.capitex-stat-card .stat-label .bi {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.capitex-stat-card .stat-value,
+.capitex-stat-card .fs-4 {
+    font-family: 'DM Sans', system-ui, sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 1.35rem !important;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--cx-text);
+}
+
+.capitex-stat-pill .fs-3 {
+    font-family: 'DM Sans', sans-serif !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.02em;
+}
+
+.capitex-admin-stat .fs-4 {
+    font-family: 'DM Sans', sans-serif !important;
+    font-weight: 600 !important;
+}
+
+/* Menu boczne */
+body.bg-dark .nav-section,
+body.capitex-app .nav-section {
+    color: var(--cx-muted) !important;
+    letter-spacing: 1px;
+    font-size: 0.68rem;
+}
+
+.list-group-capitex .list-group-item {
+    background: transparent;
+    border-color: var(--cx-border) !important;
+    color: var(--cx-subtle);
+    border-radius: 8px !important;
+    margin-bottom: 4px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    transition: background 0.15s, color 0.15s;
+}
+
+.list-group-capitex .list-group-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--cx-text);
+}
+
+.list-group-capitex .list-group-item.active,
+.list-group-capitex .list-group-item.bg-secondary {
+    background: var(--cx-card) !important;
+    color: var(--cx-text) !important;
+    border: 1px solid var(--cx-border) !important;
+    font-weight: 600;
+}
+
+.list-group-capitex .list-group-item .bi {
+    opacity: 0.75;
+    width: 1.1rem;
+}
+
+.list-group-capitex .list-group-item.active .bi,
+.list-group-capitex .list-group-item.bg-secondary .bi {
+    opacity: 1;
+    color: var(--cx-accent);
+}
+
+/* Formularze */
 body.bg-dark .form-label,
-body.bg-dark .text-muted {
-    color: #adb5bd !important;
+body.capitex-app .form-label,
+body.bg-dark .text-muted,
+body.capitex-app .text-muted {
+    color: var(--cx-subtle) !important;
 }
 
-body.bg-dark label {
-    color: #dee2e6 !important;
+body.bg-dark label,
+body.capitex-app label {
+    color: var(--cx-subtle) !important;
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
 body.bg-dark .form-control,
-body.bg-dark .form-select {
-    background-color: #212529 !important;
-    color: #ffffff !important;
-    border-color: #495057 !important;
+body.capitex-app .form-control,
+body.bg-dark .form-select,
+body.capitex-app .form-select {
+    background-color: var(--cx-surface) !important;
+    color: var(--cx-text) !important;
+    border-color: var(--cx-border) !important;
+    border-radius: 10px;
 }
 
 body.bg-dark .form-control:focus,
-body.bg-dark .form-select:focus {
-    background-color: #212529 !important;
-    color: #ffffff !important;
-    border-color: #6c757d !important;
+body.capitex-app .form-control:focus,
+body.bg-dark .form-select:focus,
+body.capitex-app .form-select:focus {
+    background-color: var(--cx-surface) !important;
+    color: var(--cx-text) !important;
+    border-color: var(--cx-accent) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
 }
 
-/* Naglowki sekcji menu (MENU) */
-body.bg-dark .nav-section {
-    color: #868e96 !important;
+/* Przyciski – jeden spójny styl */
+body.capitex-app .btn,
+body.bg-dark .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.875rem;
 }
 
-/* Statystyki w kartach – etykieta vs wartosc */
-body.bg-dark .card .fs-4,
-body.bg-dark .card .fs-5 {
-    color: #f8f9fa;
+body.capitex-app .btn-sm,
+body.bg-dark .btn-sm {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.7rem;
+}
+
+body.capitex-app .btn-primary,
+body.bg-dark .btn-primary,
+body.capitex-app .btn-success,
+body.bg-dark .btn-success {
+    background-color: var(--cx-accent);
+    border-color: var(--cx-accent);
+    color: #fff;
+}
+
+body.capitex-app .btn-primary:hover,
+body.bg-dark .btn-primary:hover,
+body.capitex-app .btn-success:hover,
+body.bg-dark .btn-success:hover {
+    background-color: var(--cx-accent-hover);
+    border-color: var(--cx-accent-hover);
+    color: #fff;
+}
+
+body.capitex-app .btn-outline-primary {
+    border-color: rgba(59, 130, 246, 0.45);
+    color: var(--cx-subtle);
+    background: transparent;
+}
+
+body.capitex-app .btn-outline-primary.active,
+body.capitex-app .btn-outline-primary:hover {
+    background-color: rgba(59, 130, 246, 0.15);
+    border-color: var(--cx-accent);
+    color: var(--cx-text);
+}
+
+body.capitex-app .btn-outline-secondary,
+body.capitex-app .btn-outline-light {
+    border-color: var(--cx-border);
+    color: var(--cx-subtle);
+    background: transparent;
+}
+
+body.capitex-app .btn-outline-secondary:hover,
+body.capitex-app .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--cx-text);
+}
+
+body.capitex-app .btn-outline-danger {
+    border-color: rgba(248, 113, 113, 0.35);
+    color: var(--cx-red);
+}
+
+body.capitex-app .btn-outline-danger:hover {
+    background: rgba(248, 113, 113, 0.1);
+    border-color: var(--cx-red);
+    color: var(--cx-red);
+}
+
+body.capitex-app .btn-warning {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--cx-border);
+    color: var(--cx-text);
+}
+
+body.capitex-app .btn-warning:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: var(--cx-text);
+}
+
+/* Tabele – miękkie separatory zamiast sztywnych kresek */
+body.capitex-app .table-dark,
+body.capitex-app .capitex-table {
+    --bs-table-bg: transparent;
+    --bs-table-border-color: transparent;
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.03);
+}
+
+body.capitex-app .capitex-table thead th,
+body.capitex-app .table.capitex-table thead th {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--cx-muted) !important;
+    font-weight: 500;
+    border: none !important;
+    border-bottom: 1px solid var(--cx-border-soft) !important;
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+    background: transparent;
+}
+
+body.capitex-app .capitex-table tbody td,
+body.capitex-app .table.capitex-table tbody td {
+    border: none !important;
+    border-bottom: 1px solid var(--cx-border-soft) !important;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    vertical-align: middle;
+}
+
+body.capitex-app .capitex-table tbody tr:last-child td,
+body.capitex-app .table.capitex-table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+body.capitex-app .capitex-table tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+body.capitex-app .text-info {
+    color: var(--cx-info) !important;
+}
+
+body.capitex-app .text-success {
+    color: var(--cx-green) !important;
+}
+
+body.capitex-app .text-danger {
+    color: var(--cx-red) !important;
+}
+
+/* Badge kategorii portfela */
+.badge-cx-broker { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+.badge-cx-exchange { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+.badge-cx-alternative { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+/* Interakcje */
+.cursor-pointer { cursor: pointer; }
+.cursor-pointer:hover:not(.asset-search-item) {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+}
+.delete-btn { opacity: 0.35; transition: opacity 0.2s; }
+.delete-btn:hover { opacity: 1 !important; }
+
+/* Autocomplete aktyw w modalu transakcji – pełne tło, bez przeświecania pól pod spodem */
+#search_results.asset-search-results {
+    z-index: 1060;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: var(--cx-card);
+    border: 1px solid var(--cx-border);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    padding: 4px;
+}
+
+#search_results .asset-search-item {
+    cursor: pointer;
+    background-color: var(--cx-card) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    color: var(--cx-text) !important;
+    padding: 0.55rem 0.75rem;
+    margin-bottom: 2px;
+}
+
+#search_results .asset-search-item:hover,
+#search_results .asset-search-item:focus {
+    background-color: var(--cx-surface) !important;
+    color: var(--cx-text) !important;
+}
+
+body.capitex-app .modal-body {
+    overflow: visible;
+}
+
+/* Auth / landing */
+.capitex-auth-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.capitex-auth-card {
+    border-radius: 20px !important;
+    padding: 2rem !important;
+    max-width: 420px;
+    width: 100%;
+}
+
+.capitex-auth-card .auth-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+}
+
+.capitex-hero-title {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.capitex-stat-pill .bi {
+    font-size: 1.25rem;
+    color: var(--cx-accent);
+    margin-bottom: 0.35rem;
+}
+
+/* Admin stat cards */
+.capitex-admin-stat .bi {
+    font-size: 1.1rem;
+    color: var(--cx-accent);
+    margin-bottom: 0.25rem;
 }
