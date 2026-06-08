@@ -163,7 +163,7 @@ Główny seeder (`DatabaseSeeder`) wypełnia bazę danymi startowymi:
 |-----------|------|------|
 | Role `admin` / `user` | `DatabaseSeeder` | Słownik ról w systemie |
 | Konto administratora | `DatabaseSeeder` | Jedno konto z pełnymi uprawnieniami |
-| **100 kont testowych** | `UserSeeder` | Losowe polskie imiona i unikalne maile (Faker `pl_PL`), **bez portfeli i transakcji** |
+| **100 kont testowych** | `UserSeeder` | Polskie imiona, nazwiska lub nicki (bez tytułów naukowych), unikalne maile (Faker `pl_PL`), **bez portfeli i transakcji** |
 | Słownik aktywów | `AssetSeeder` | Globalne tickery (BTC, AAPL, CDR) – nie przypisane do użytkowników |
 
 **Pełny reset bazy + seed** (zalecane przy pierwszym uruchomieniu i przed zdjęciami do dokumentacji):
@@ -204,7 +204,7 @@ php artisan storage:link
 | Pole | Wartość |
 |------|---------|
 | Rola | `user` (zwykły użytkownik) |
-| Nazwa / email | Losowe, generowane przez Faker (np. `jan.kowalski@example.com`) |
+| Nazwa / email | Losowe: np. `Anna Kowalska`, `Janek`, `ania42` + mail z Faker |
 | Hasło | `password` (wspólne dla wszystkich kont testowych) |
 | Portfele / transakcje | Brak – puste konta pod listę w panelu admina i statystyki |
 
@@ -292,7 +292,25 @@ Na słabszym sprzęcie lub wolniejszym internecie aplikacja nadal działa, ale �
 
 ## Podręcznik użytkownika
 
-> **Sekcja w przygotowaniu** – zostanie uzupełniona o ścieżki użytkownika, opisy funkcji, role w systemie oraz zrzuty ekranu z działającej aplikacji.
+### Strona tytułowa
+
+Użytkownik niezalogowany jako pierwszą rzecz widzi stronę tytułową. Strona tytułowa posiada podstawowe statystyki pobrane z bazy danych takie jak:
+
+![image](/assets/strona-tytulowa.png)
+
+- Liczba użytkowników
+- Liczba portfeli
+- Liczba dokonanych transakcji które użytkownicy przenieśli do aplikacji
+
+### Logowanie do systemu
+
+Cechą wspólną zarówno konta użytkownika standardowego jak i administratora jest panel logowania który dla obu jest taki sam. 
+
+Formularz logowania umożliwia uwierzytelnienie użytkownika przy użyciu adresu email oraz hasła.
+
+###
+
+###
 
 ## Plany rozbudowy
 
