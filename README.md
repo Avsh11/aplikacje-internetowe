@@ -292,125 +292,186 @@ Na słabszym sprzęcie lub wolniejszym internecie aplikacja nadal działa, ale �
 
 ## Podręcznik użytkownika
 
-### Strona tytułowa
+Poniższy opis dotyczy korzystania z aplikacji z perspektywy użytkownika końcowego. Instrukcje techniczne (instalacja, seed) znajdują się w sekcji **Uruchomienie projektu (developer)**.
 
-Użytkownik niezalogowany jako pierwszą rzecz widzi stronę tytułową. Strona tytułowa posiada podstawowe statystyki pobrane z bazy danych takie jak:
+### Wspólne: pierwsze kroki
 
-![image](/assets/strona-tytulowa.png)
+#### Strona tytułowa
 
-- Liczba użytkowników
-- Liczba portfeli
-- Liczba dokonanych transakcji które użytkownicy przenieśli do aplikacji
+Niezalogowany użytkownik jako pierwszy ekran widzi stronę tytułową ze statystykami pobranymi z bazy danych.
 
-### Logowanie do systemu
+![Strona tytułowa Capitex](./assets/strona-tytulowa.png)
 
-Cechą wspólną zarówno konta użytkownika standardowego jak i administratora jest panel logowania który dla obu jest taki sam. Na stronie tytułowej możemy przejść do tego panelu poprzez kliknięcie w przycisk umieszczony w prawym górnym rogu jak i po środku podpisany odpowiednio **Zaloguj się**.
+*Rys. 1 – Strona startowa: logo, liczniki (użytkownicy, portfele, transakcje) oraz przyciski **Rejestracja** i **Zaloguj się**.*
 
-Formularz logowania umożliwia uwierzytelnienie użytkownika przy użyciu adresu email oraz hasła.
+Wyświetlane liczby oznaczają:
+- **Użytkownicy** – liczba kont w systemie,
+- **Portfele** – łączna liczba portfeli wszystkich użytkowników,
+- **Transakcje** – łączna liczba zapisanych transakcji kupna.
 
-![image](/assets/login.png)
+#### Logowanie
 
-Możemy zalogować się za pomocą:
-- Adresu email
-- Hasła
-W razie gdy zapomnimy hasła możemy kliknąć w przycisk **Zapomniałeś hasła?** umieszczony jako niebieski tekst na dole. Ten przycisk przekieruje nas do panelu w którym podając swój adres email możemy poprosić o reset hasła - **funkcja jeszcze niedostępna**
+To samo okno logowania służy zarówno zwykłemu użytkownikowi, jak i administratorowi. Wejście możliwe ze strony tytułowej (przycisk **Zaloguj się** w nagłówku lub na dole strony).
 
-![image](/assets/admin/forgot_password.png)
+![Formularz logowania](./assets/login.png)
 
-Możemy potem powrócić do logowania klikając w przycisk poniżej formularza.
+*Rys. 2 – Logowanie: adres e-mail, hasło oraz link **Zapomniałeś hasła?**.*
 
-### Panel rejestracji
+Wymagane pola:
+- adres e-mail,
+- hasło.
 
-Użytkownik może zarejestrować się do systemu tym samym stając się użytkownikiem zamiast użytkownikiem niezalogowanym, który dostęp ma tylko do strony tytułowej i podstawowych statystyk.
+Link **Zapomniałeś hasła?** prowadzi do formularza resetu hasła. W wersji v1.0 wysyłka maila resetującego **nie jest jeszcze skonfigurowana** – ekran istnieje, ale funkcja nie działa end-to-end.
 
-Zarejestrować się możemy poprzez podanie w formularzu następujących danych:
-- Imię
-- Adres e-mail
-- Domyślna waluta z pola rozwijanego: **USD** / **PLN** / **EUR** w której będziemy wyświetlać aktywa
-- Podanie hasła i jego powtórzenie
+![Reset hasła – ekran formularza](./assets/admin/forgot_password.png)
 
-![image](/assets/user/rejestracja.png)
+*Rys. 3 – Formularz „Zapomniałeś hasła?” z polem e-mail i linkiem powrotu do logowania.*
 
-Po kliknięciu przycisku **Utwórz konto** użytkownik zostanie przeniesiony na swój dashboard. Ma on też dostęp do przycisku **Zaloguj się**, uprzednio mając napis zachęcający "Masz już konto?".
+#### Rejestracja
+
+Nowy użytkownik zakłada konto przez **Rejestracja** na stronie tytułowej. Po rejestracji otrzymuje rolę `user` i trafia na dashboard.
+
+![Formularz rejestracji](./assets/user/rejestracja.png)
+
+*Rys. 4 – Rejestracja: imię, e-mail, domyślna waluta (PLN / USD / EUR), hasło i potwierdzenie.*
+
+W formularzu należy podać:
+- imię,
+- adres e-mail,
+- domyślną walutę wyświetlania (**PLN**, **USD** lub **EUR**),
+- hasło (min. 8 znaków) i jego powtórzenie.
+
+Po kliknięciu **Utwórz konto** użytkownik jest przekierowywany na dashboard. Link **Zaloguj się** na dole formularza wraca do logowania.
 
 ### Panel administratora
 
-W aplikacji dostępne jest po uprzedniej konfiguracji konto administratora:
-- email(login): admin@capitex.pl
-- hasło: admin
+Konto administratora tworzone jest przez seeder (środowisko deweloperskie):
 
-Gdy zalogujemy się w panelu logowania za pomocą tego adresu oraz hasła zostaniemy przekierowani na pierwszy panel dla roli użytkownika administrator.
+| Pole | Wartość |
+|------|---------|
+| E-mail | `admin@capitex.pl` |
+| Hasło | `admin` |
 
-#### Dashboard administratora
+Po zalogowaniu tym kontem użytkownik ma rolę **admin** (`role_id = 1`) i widzi ten sam dashboard portfela co zwykły użytkownik, plus dodatkową pozycję menu **Panel admina**.
 
-Po zalogowaniu się, aplikacja przenosi nas poprzez system ról (role_id 0/1) do dashboardu administratora. Administrator podobnie jak użytkownik może posiadać swoje własne portfele i transakcje. Obsługa tej funkcjonalności jest taka sama jak po stronie użytkownika i w jego sekcji będzie odpowiednio wytłumaczona. 
+> Administrator **nie może** zmieniać haseł innych użytkowników – zarządza profilem (nazwa, e-mail, rola, waluta), ale nie hasłem.
 
-![image](/assets/admin/admin-dashboard.png)
+#### Dashboard administratora (portfel)
 
-#### Admin panel
+Po logowaniu administrator trafia na dashboard inwestycyjny – tak jak użytkownik. Może tworzyć własne portfele i transakcje; obsługa opisana będzie w sekcji **Panel użytkownika**.
 
-Po kliknięciu przycisku **Panel admina** umiejsciowionego w menu po lewej stronie, dodatkowo wyróżnionego kolorem czerwonym przeniesiemy się na panel admina.
+![Dashboard administratora z własnym portfelem](./assets/admin/admin-dashboard.png)
 
-![image](/assets/admin/admin-users-dashboard.png)
+*Rys. 5 – Dashboard admina: statystyki portfela, wykresy, lista aktywów oraz w menu pozycja **Panel admina** (wyróżniona kolorem).*
 
-Po wejściu w panel, możemy zauważyć navbar na którym po prawej stronie mamy przyciski wylogowania się oraz powrotu do panelu dashboard z portfelami. Poniżej mamy trzy kafelki pokazujące następujące informacje:
-- liczba użytkowników
-- liczba portfeli
-- liczba transakcji
+#### Lista użytkowników (Panel admina)
 
-Poniżej mamy listę użytkowników oraz formularz filtrujący.
+Pozycja **Panel admina** w bocznym menu otwiera widok zarządzania kontami.
 
-#### Filtrowanie po nazwie
+![Panel administratora – lista użytkowników](./assets/admin/admin-users-dashboard.png)
 
-Jednym z filtrów jest filtr **Nazwa** w którym możemy wyszukiwać użytkowników po ich nazwie
+*Rys. 6 – Panel admina: statystyki (użytkownicy, portfele, transakcje), filtry oraz tabela kont z akcjami edycji i usuwania.*
 
-![image](/assets/admin/admin-users-dashboard-filter-name.png)
+W górnym pasku dostępne są:
+- **Mój portfel** – powrót do dashboardu inwestycyjnego,
+- **Wyloguj** – zakończenie sesji.
 
-#### Filtrowanie po adresie e-mail
+Trzy kafelki pokazują:
+- liczbę użytkowników z rolą `user`,
+- łączną liczbę portfeli w systemie,
+- łączną liczbę transakcji.
 
-Kolejnym filtrem jest filtr **Email** w którym możemy wyszukiwać użytkowników po ich adresie e-mail
+Poniżej znajduje się tabela użytkowników oraz formularz filtrowania.
 
-![image](/assets/admin/admin-filter-email.png)
+#### Filtrowanie i sortowanie
 
-#### Filtrowanie po roli
+**Filtr po nazwie** – wyszukiwanie fragmentu imienia lub nazwiska.
 
-Kolejnym filtrem jest filtr **Rola** w którym możemy sortować użytkowników po ich roli user/admin
+![Filtr po nazwie użytkownika](./assets/admin/admin-users-dashboard-filter-name.png)
 
-![image](/assets/admin/admin-filter-by-roles.png)
+*Rys. 7 – Filtrowanie listy po polu **Nazwa** (np. „Angelika Mazur”).*
 
-#### Filtrowanie - sortowanie
+**Filtr po e-mailu** – wyszukiwanie po fragmencie adresu.
 
-Kolejnym filtrem jest pole rozwijane **Sortowanie** w którym możemy:
-- filtrować użytkowników zaczynając od administratorów na samej górze
-- filtrować użytkowników od A-Z po nazwie
-- fitrować użytkowników od A-Z po adresie e-mail
+![Filtr po adresie e-mail](./assets/admin/admin-filter-email.png)
 
-![image](/assets/admin/admin-on-top.png)
+*Rys. 8 – Filtrowanie listy po polu **Email**.*
 
-![image](/assets/admin/name-az.png)
+**Filtr po roli** – ograniczenie listy do administratorów lub zwykłych użytkowników.
 
-![image](/assets/admin/email-az.png)
+![Filtr po roli user/admin](./assets/admin/admin-filter-by-roles.png)
 
-#### Edycja użytkowników
+*Rys. 9 – Filtrowanie po roli (**user** lub **admin**).*
 
-Po kliknięciu przycisku po prawej stronie z ikonką ołówka, zostaniemy przeniesieni do panelu edycji danego użytkownika:
+**Sortowanie** – kolejność wyświetlania w tabeli:
 
-![image](/assets/admin/admin-user-dashboard-change-settings.png)
+| Opcja | Efekt |
+|-------|--------|
+| Administratorzy na górze | Konta `admin` nad kontami `user` |
+| Nazwa A–Z | Sortowanie alfabetyczne po imieniu |
+| Email A–Z | Sortowanie alfabetyczne po adresie e-mail |
 
-#### Usuwanie użytkowników
+![Sortowanie – administratorzy na górze](./assets/admin/admin-on-top.png)
 
-Po kliknęciu przycisku po prawej stronie w panelu admina oznaczonego ikonką kosza i czerwonego koloru możemy usunąć danego użytkownika wraz z jego portfelami i transakcjami:
+*Rys. 10a – Sortowanie: administratorzy na górze listy.*
 
-![image](/assets/admin/admin-remove-user.png)
+![Sortowanie – nazwa A–Z](./assets/admin/name-az.png)
 
-#### Podsumowanie - funkcjonalności administratora
-Administrator w swojej części aplikacji może:
--
--
--
--
--
+*Rys. 10b – Sortowanie alfabetyczne po nazwie.*
+
+![Sortowanie – e-mail A–Z](./assets/admin/email-az.png)
+
+*Rys. 10c – Sortowanie alfabetyczne po adresie e-mail.*
+
+Przycisk **Filtruj** stosuje kryteria; **Wyczyść** resetuje formularz.
+
+#### Edycja użytkownika
+
+Ikona ołówka w kolumnie **Akcje** otwiera formularz edycji wybranego konta.
+
+![Edycja danych użytkownika](./assets/admin/admin-user-dashboard-change-settings.png)
+
+*Rys. 11 – Edycja: nazwa, e-mail, rola (user/admin), waluta domyślna.*
+
+Administrator może zmienić:
+- nazwę,
+- adres e-mail,
+- rolę (`user` / `admin`) – **z wyjątkiem własnego konta** (nie może odebrać sobie roli admina),
+- walutę wyświetlania (PLN / USD / EUR).
+
+#### Usuwanie użytkownika
+
+Ikona kosza usuwa konto wraz z powiązanymi portfelami i transakcjami (kasowanie kaskadowe).
+
+![Usuwanie użytkownika](./assets/admin/admin-remove-user.png)
+
+*Rys. 12 – Potwierdzenie usunięcia użytkownika z listy.*
+
+Ograniczenia:
+- administrator **nie może usunąć samego siebie**,
+- **nie można usunąć ostatniego** konta z rolą `admin`.
+
+#### Podsumowanie – funkcjonalności administratora
+
+Administrator w aplikacji Capitex może:
+
+- zalogować się tym samym formularzem co zwykły użytkownik,
+- korzystać z **własnego dashboardu** (portfele, transakcje, wykresy) – tak jak użytkownik,
+- wejść w **Panel admina** z bocznego menu,
+- przeglądać **statystyki systemu** (liczba użytkowników, portfeli, transakcji),
+- **filtrować listę kont** po nazwie, e-mailu i roli,
+- **sortować listę** (admini na górze, nazwa A–Z, e-mail A–Z),
+- **edytować dane użytkownika** (nazwa, e-mail, rola, waluta),
+- **usuwać konta użytkowników** (z portfelami i transakcjami), z wyjątkiem siebie i ostatniego admina,
+- wrócić do **Mój portfel** lub **wylogować się**.
+
+Administrator **nie może**:
+- ustawiać ani resetować haseł innych użytkowników,
+- edytować transakcji ani portfeli innych użytkowników z poziomu panelu admina (tylko zarządza kontami).
+
 ### Panel użytkownika
+
+> *Sekcja w przygotowaniu – opis dashboardu, portfeli, transakcji, ustawień i filtrów.*
 
 ## Plany rozbudowy
 
