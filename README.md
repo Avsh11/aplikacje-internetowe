@@ -47,7 +47,7 @@ Kod aplikacji znajduje się w katalogu `capitex/` (w repozytorium `aplikacje-int
 #### Dodatkowe narzędzia 
 - Przeglądarka (Chrome, Firefox, Edge)
 - Połączenie z internetem (pobieranie cen z API)
-- Edytor kodu (np. VS Code / Cursor) – opcjonalnie w dokumentacji
+- Edytor kodu 
 
 
 
@@ -358,7 +358,7 @@ Po zalogowaniu tym kontem użytkownik ma rolę **admin** (`role_id = 1`) i widzi
 
 #### Dashboard administratora (portfel)
 
-Po logowaniu administrator trafia na dashboard inwestycyjny – tak jak użytkownik. Może tworzyć własne portfele i transakcje; obsługa opisana będzie w sekcji **Panel użytkownika**.
+Po logowaniu administrator trafia na dashboard inwestycyjny – tak jak użytkownik. Może tworzyć własne portfele i transakcje; obsługa opisana w sekcji **Panel użytkownika** poniżej.
 
 ![Dashboard administratora z własnym portfelem](./assets/admin/admin-dashboard.png)
 
@@ -471,7 +471,224 @@ Administrator **nie może**:
 
 ### Panel użytkownika
 
-> *Sekcja w przygotowaniu – opis dashboardu, portfeli, transakcji, ustawień i filtrów.*
+Zwykły użytkownik (`role_id = 2`) po rejestracji lub logowaniu zarządza własnymi portfelami, transakcjami i ustawieniami profilu. Nie widzi **Panelu admina** w menu.
+
+#### Dashboard główny
+
+Po zalogowaniu użytkownik trafia na dashboard inwestycyjny. Ekran składa się z:
+
+- **górnego paska** – nazwa użytkownika, avatar, przycisk **Wyloguj**,
+- **menu bocznego** – Dashboard, Transakcje, Ustawienia oraz lista **Moje Portfele**,
+- **obszaru głównego** – kafelki (wartość całkowita, niezrealizowany zysk, zwrot %), wykres liniowy, wykres kołowy (alokacja) oraz tabela **Moje Aktywa** (suma ze wszystkich portfeli).
+
+![Dashboard użytkownika](./assets/user/user-dashboard.png)
+
+*Rys. 13 – Dashboard: statystyki portfela, wykresy, tabela aktywów i lista portfeli w menu bocznym.*
+
+#### Historia transakcji
+
+Pozycja **Transakcje** w menu otwiera listę wszystkich transakcji użytkownika. Powrót do dashboardu: **Dashboard** w menu bocznym.
+
+Tabela pokazuje m.in. datę, portfel, aktywo, ilość, cenę jednostkową i wartość transakcji. Filtry stosuje się przyciskiem **Filtruj** (formularz GET – Enter w polu filtra również wysyła formularz).
+
+![Historia transakcji](./assets/user/transactions-main.png)
+
+*Rys. 14 – Widok transakcji z formularzem filtrowania nad tabelą.*
+
+##### Filtrowanie i sortowanie transakcji
+
+| Filtr / sortowanie | Opis |
+|--------------------|------|
+| **Nazwa aktywa** | Fragment nazwy instrumentu (np. „NVIDIA”) |
+| **Ticker** | Symbol giełdowy (np. „NVDA”, „BTC”) |
+| **Portfel** | Nazwa portfela (np. „XTB”) |
+| **Sortowanie** | Data ↓/↑, ticker A–Z, nazwa aktywa A–Z, portfel A–Z |
+
+![Filtr po nazwie aktywa](./assets/user/filter-name.png)
+
+*Rys. 15 – Filtrowanie transakcji po nazwie aktywa.*
+
+![Filtr po tickerze](./assets/user/filter-ticker.png)
+
+*Rys. 16 – Filtrowanie po symbolu tickera (akcje, ETF, krypto).*
+
+![Filtr po portfelu](./assets/user/filter-wallet.png)
+
+*Rys. 17 – Filtrowanie transakcji przypisanych do wybranego portfela.*
+
+Opcje sortowania (pole rozwijane **Sortowanie**):
+
+![Sortowanie – data najnowsze](./assets/user/sort-new.png)
+
+*Rys. 18a – Sortowanie: data (najnowsze).*
+
+![Sortowanie – data najstarsze](./assets/user/sort-old.png)
+
+*Rys. 18b – Sortowanie: data (najstarsze).*
+
+![Sortowanie – ticker A–Z](./assets/user/ticker-az.png)
+
+*Rys. 18c – Sortowanie alfabetyczne po tickerze.*
+
+![Sortowanie – nazwa aktywa A–Z](./assets/user/name-az.png)
+
+*Rys. 18d – Sortowanie alfabetyczne po nazwie aktywa.*
+
+![Sortowanie – portfel A–Z](./assets/user/wallet-az.png)
+
+*Rys. 18e – Sortowanie alfabetyczne po nazwie portfela.*
+
+##### Skrót z dashboardu
+
+Kliknięcie wiersza aktywa w tabeli **Moje Aktywa** na dashboardzie przenosi do transakcji z filtrem po tickerze tego instrumentu.
+
+![Dashboard – tabela aktywów (kliknięcie wiersza)](./assets/user/user-dashboard.png)
+
+*Rys. 19a – Kliknięcie w aktywo na dashboardzie (wiersz w **Moje Aktywa**).*
+
+![Transakcje po kliknięciu aktywa](./assets/user/after-filter-click-dashboard.png)
+
+*Rys. 19b – Lista transakcji przefiltrowana do wybranego tickera.*
+
+##### Usuwanie transakcji
+
+Czerwona ikona kosza w kolumnie akcji usuwa transakcję po potwierdzeniu w oknie dialogowym.
+
+![Usuwanie transakcji](./assets/user/delete-trasnaction.png)
+
+*Rys. 20 – Usunięcie pojedynczej transakcji z historii.*
+
+#### Ustawienia profilu
+
+Pozycja **Ustawienia** w menu prowadzi do edycji profilu i hasła.
+
+W sekcji **Profil i preferencje** użytkownik może:
+- wgrać **avatar** (JPG, PNG, WEBP, max 2 MB),
+- zmienić **nazwę** i **adres e-mail**,
+- wybrać **walutę wyświetlania** (PLN / USD / EUR) – wartości na dashboardzie przeliczane są przez kursy NBP,
+- zapisać zmiany przyciskiem **Zapisz ustawienia**.
+
+W sekcji **Zmiana hasła** (osobny formularz):
+- obecne hasło,
+- nowe hasło i potwierdzenie,
+- przycisk **Zmień hasło**.
+
+![Ustawienia – waluta wyświetlania](./assets/user/currency-change-setting.png)
+
+*Rys. 21 – Fragment ustawień: waluta wyświetlania i zapis profilu.*
+
+#### Dodawanie transakcji (broker / giełda)
+
+Przycisk **+ Dodaj transakcję** na dashboardzie (głównym lub portfela) otwiera modal.
+
+![Modal dodawania transakcji](./assets/user/add-transaction.png)
+
+*Rys. 22 – Formularz transakcji dla portfela typu Broker lub Exchange.*
+
+Pola formularza (akcje, ETF, krypto):
+- **Portfel docelowy** – wybór z listy portfeli użytkownika,
+- **Wyszukaj aktywo** – autocomplete z API (Yahoo Finance dla brokerów, Binance dla krypto),
+- **Ilość** i **cena za jednostkę** (cena z API na wybraną datę lub wpisana ręcznie),
+- **Data transakcji**,
+- podgląd **wartości całkowitej** i kursu do PLN (NBP).
+
+![Wybór portfela w modalu](./assets/user/pole-rozwijane-dodaj-aktywo.png)
+
+*Rys. 23 – Pole rozwijane **Portfel docelowy** w modalu transakcji.*
+
+#### Dodawanie transakcji (portfel alternatywny)
+
+Dla portfela kategorii **Alternatywne** modal przełącza się na formularz ręczny (bez wyszukiwarki giełdowej):
+
+![Transakcja alternatywna](./assets/user/alternative-asset-add.png)
+
+*Rys. 24 – Formularz dla gotówki, auta itd.: opis, kwota, opcjonalna ilość, waluta (PLN/USD/EUR), data.*
+
+- **Opis aktywa** – np. „gotówka na koncie”, „Samochód Opel Astra”,
+- **Kwota** – wartość całkowita transakcji,
+- **Ilość** (opcjonalnie) – puste dla gotówki; np. `1` dla pojedynczego przedmiotu,
+- **Waluta** – PLN, USD lub EUR,
+- **Data transakcji**.
+
+Aktywa alternatywne wliczają się do **wartości portfela** i **wykresu kołowego** (alokacja), ale **nie** do wykresu liniowego (brak notowań z API).
+
+#### Zarządzanie portfelami
+
+##### Dodawanie portfela
+
+Przycisk **+** przy nagłówku **Moje Portfele** otwiera modal tworzenia portfela.
+
+![Przycisk dodawania portfela](./assets/user/add-portfel.png)
+
+*Rys. 25a – Przycisk **+** przy sekcji portfeli.*
+
+![Formularz nowego portfela](./assets/user/add-portfel-context-menu.png)
+
+*Rys. 25b – Nazwa portfela i kategoria: **Broker** (akcje, ETF), **Giełda** (krypto), **Alternatywne** (gotówka, dobra ręczne).*
+
+Zatwierdzenie: **Zapisz portfel**.
+
+##### Usuwanie portfela
+
+Ikona kosza obok nazwy portfela usuwa portfel wraz z jego transakcjami (po potwierdzeniu).
+
+![Usuwanie portfela](./assets/user/portfel-delete.png)
+
+*Rys. 26 – Potwierdzenie usunięcia portfela z listy bocznej.*
+
+##### Dashboard pojedynczego portfela
+
+Kliknięcie **nazwy portfela** w menu bocznym otwiera widok z danymi tylko tego portfela (te same wykresy i tabela, bez pozycji z innych portfeli).
+
+![Dashboard wybranego portfela](./assets/user/sub-dashboard.png)
+
+*Rys. 27 – Pod-dashboard jednego portfela (np. XTB).*
+
+#### Wykresy
+
+**Wykres kołowy (Alokacja)** – udział poszczególnych aktywów w portfelu (w tym pozycje ręczne / gotówka).
+
+**Wykres liniowy (Rozwój portfela)** – zmiana wartości w czasie na podstawie transakcji rynkowych (akcje, ETF, krypto). Zakresy: **1D**, **7D**, **1M**, **1Y**, **ALL**. Aktywa alternatywne nie są uwzględniane na tym wykresie.
+
+![Wykres liniowy – zakres 1Y](./assets/user/line-graph-1y.png)
+
+*Rys. 28 – Wykres liniowy z wybranym filtrem czasu **1Y**.*
+
+#### Wylogowanie
+
+Przycisk **Wyloguj** w prawym górnym rogu kończy sesję i przekierowuje na stronę tytułową.
+
+![Przycisk wylogowania](./assets/user/logout-button.png)
+
+*Rys. 29a – **Wyloguj** obok nazwy użytkownika i avatara.*
+
+![Strona tytułowa po wylogowaniu](./assets/user/main-title-site-afterlogou.png)
+
+*Rys. 29b – Powrót na stronę startową po wylogowaniu.*
+
+#### Podsumowanie – funkcjonalności użytkownika
+
+Użytkownik w aplikacji Capitex może:
+
+- zarejestrować konto i zalogować się,
+- przeglądać **dashboard** ze statystykami portfela (wartość, zysk/strata, zwrot %),
+- tworzyć i usuwać **portfele** (Broker, Giełda, Alternatywne),
+- otwierać **widok jednego portfela** (kliknięcie nazwy w menu),
+- dodawać **transakcje kupna** – z API (akcje, ETF, krypto) lub ręcznie (aktywa alternatywne),
+- przeglądać **historię transakcji** z filtrowaniem (nazwa, ticker, portfel) i sortowaniem,
+- przejść z dashboardu do transakcji danego aktywa (klik w wiersz tabeli),
+- **usuwać** transakcje,
+- zmieniać **ustawienia profilu** (avatar, nazwa, e-mail, waluta wyświetlania),
+- zmieniać **własne hasło**,
+- korzystać z **wykresów** (alokacja + rozwój portfela dla aktywów rynkowych),
+- **wylogować się**.
+
+Użytkownik **nie może** (w v1.0):
+
+- edytować istniejących transakcji ani portfeli (tylko dodawanie i usuwanie),
+- rejestrować transakcji sprzedaży (*sell*),
+- zarządzać kontami innych użytkowników,
+- wejść w panel administratora.
 
 ## Plany rozbudowy
 
