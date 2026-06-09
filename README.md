@@ -62,13 +62,12 @@ Poniższa instrukcja zakłada, że osoba uruchamiająca projekt **nie zna Larave
 3. Sklonuj repozytorium:
 
 ```bash
-git clone <URL_TWOJEGO_REPOZYTORIUM>
+git clone <https://github.com/Avsh11/aplikacje-internetowe.git>
 cd aplikacje-internetowe/capitex
 ```
 
 Lub poprzez aplikację **GitHub Desktop**, gdzie proces jest zautomatyzowany
 
-> Zamień `<URL_TWOJEGO_REPOZYTORIUM>` na link do repozytorium Git (GitHub / GitLab).
 
 #### Krok 2: Instalacja zależności PHP
 
